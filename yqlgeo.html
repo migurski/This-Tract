@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <script type="text/javascript" src="http://isithackday.com/hacks/geo/yql-geo-library/yqlgeo.js"></script>
+    <script type="text/javascript" src="http://code.modestmaps.com/0.13.2/modestmaps.min.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.3.min.js"></script>
-	<title>Innit</title>
+    <title>Innit</title>
     <style type="text/css" title="text/css">
     <!--
     
@@ -12,7 +13,13 @@
         {
             font-family: Helvetica, Arial, sans-serif;
         }
-    
+        
+        #block { display: none; }
+        
+        #tract-map { height: 400px; }
+        .gender-chart { height: 100px; }
+        .age-chart, .race-chart, .housing-chart { height: 150px; }
+
     -->
     </style>
     <script type="text/javascript">
@@ -189,6 +196,13 @@
             
             $('#tract .name').text(o.Name);
             
+            var template = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/{Z}/{X}/{Y}.png';
+            var provider = new com.modestmaps.TemplatedMapProvider(template);
+            var element = document.getElementById('tract-map');
+            var map = new com.modestmaps.Map(element, provider, new com.modestmaps.Point(900, 300));
+            map.setCenterZoom(new com.modestmaps.Location(o.Geography.Latitude, o.Geography.Longitude), 15);
+            map.draw();
+            
             dodemographics('#tract', o.Demographics);
         }
     
@@ -196,8 +210,8 @@
         {
             console.log(['block', o]);
             
-            $('#block').text('Block ' + o.Block.FIPS);
-            
+            $('#block .name').text('Block ' + o.Block.FIPS);
+    
             if(!o.Block.FIPS.match(/^(\d{2})(\d{3})(\d{6})(\d{4})/))
             {
                 console.log([o.Block.FIPS, '?!']);
@@ -248,20 +262,23 @@
     <script type="text/javascript">
     <!--
         //yqlgeo.get('visitor', onlocation);
-        var loc = {'place': {'centroid': {'latitude': 37.804189, 'longitude': -122.263198}}};
         var loc = {'place': {'centroid': {'latitude': 37.764863, 'longitude': -122.419313}}};
+        var loc = {'place': {'centroid': {'latitude': 37.804189, 'longitude': -122.263198}}};
         onlocation(loc);
     //-->
     </script>
     
     <ol>
-        <li id="block">…</li>
+        <li id="block">
+            <h2 class="name">…</h2>
+        </li>
         <li id="tract">
             <h2 class="name">…</h2>
             <p>
                 Population: <strong class="population-number">…</strong>.
                 Housing units: <strong class="housing-number">…</strong>.
             </p>
+            <div id="tract-map"></div>
             <p class="gender-chart"></p>
             <p class="age-chart"></p>
             <p class="race-chart"></p>
