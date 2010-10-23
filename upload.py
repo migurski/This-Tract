@@ -151,7 +151,7 @@ if __name__ == '__main__':
             #
             content = {
                        'Name': row['Name'],
-                       'FIPS': row['County FIPS'],
+                       'FIPS': row['State FIPS'] + row['County FIPS'],
                        'Summary Level': row['Summary Level'],
                        'State': 'http://%s.s3.amazonaws.com/states/%s.json' % (bucket, row['State FIPS']),
                        'Geography': geography,
@@ -160,7 +160,23 @@ if __name__ == '__main__':
             
             key = 'counties/%(State FIPS)s/%(County FIPS)s.json' % row
             
-        elif row['Summary Level'] == '871':
+        elif row['Summary Level'] == '080':
+            #
+            # A tract
+            #
+            content = {
+                       'Name': row['Name'],
+                       'FIPS': row['State FIPS'] + row['County FIPS'] + row['Tract'],
+                       'Summary Level': row['Summary Level'],
+                       'State': 'http://%s.s3.amazonaws.com/states/%s.json' % (bucket, row['State FIPS']),
+                       'County': 'http://%s.s3.amazonaws.com/counties/%s/%s.json' % (bucket, row['State FIPS'], row['County FIPS']),
+                       'Geography': geography,
+                       'Demographics': demographics
+                      }
+            
+            key = 'tracts/%(State FIPS)s/%(County FIPS)s/%(Tract)s.json' % row
+            
+        elif row['Summary Level'] == '080':
             #
             # A zip code
             #
