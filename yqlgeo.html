@@ -2,37 +2,201 @@
 <html lang="en">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <script src="http://isithackday.com/hacks/geo/yql-geo-library/yqlgeo.js" type="text/javascript"></script>
+    <script type="text/javascript" src="http://isithackday.com/hacks/geo/yql-geo-library/yqlgeo.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.3.min.js"></script>
 	<title>Innit</title>
+    <style type="text/css" title="text/css">
+    <!--
+    
+        body
+        {
+            font-family: Helvetica, Arial, sans-serif;
+        }
+    
+    -->
+    </style>
     <script type="text/javascript">
     <!--
+    
+        function bigNumber(value)
+        {
+            var valueText = value.toFixed(0);
+            
+            while(valueText.match(/\d{4}\b/))
+            {
+                valueText = valueText.replace(/^(\d+)(\d{3}\b.*)$/, '$1,$2');
+            }
+            
+            return valueText;
+        }
+    
+        function dodemographics(id, demographics)
+        {
+            var population = demographics[0][0];
+            var housing = demographics[1][0];
+            
+            $([id, '.population-number'].join(' ')).text(bigNumber(population));
+            $([id, '.housing-number'].join(' ')).text(bigNumber(housing));
+            
+            function raceChart()
+            {
+                var counts = [], races = [];
+                
+                for(var i = 8; i >= 2; i -= 1)
+                {
+                    var count = (100 * demographics[i][0] / population).toFixed(1);
+    
+                    counts.push(count);
+                    races.push(escape(count + '% ' + demographics[i][1]));
+                }
+                
+                var chart = new Image();
+    
+                chart.src = ['http://chart.apis.google.com/chart?cht=p',
+                             '&chs=900x150',
+                             '&chd=t:', counts.join(','),
+                             '&chl=', races.join('|')].join('');
+                
+                return chart;
+            }
+            
+            function genderChart()
+            {
+                var counts = [
+                              (100 * demographics[9][0] / population).toFixed(1),
+                              (100 * demographics[33][0] / population).toFixed(1)
+                             ];
+                
+                var genders = [counts[0] + '% Male', counts[1] + '% Female'];
+                
+                var chart = new Image();
+                
+                chart.src = ['http://chart.apis.google.com/chart?cht=p',
+                             '&chs=900x100',
+                             '&chd=t:', counts.join(','),
+                             '&chl=', genders.join('|')].join('');
+                
+                return chart;
+            }
+            
+            function ageChart()
+            {
+                var counts = [], ages = [];
+                
+                var blocks = [['Under 18', 10, 13, 34, 37],
+                              ['Age 18 to 29', 14, 18, 38, 42],
+                              ['Age 30 to 44', 19, 21, 43, 45],
+                              ['Age 45 to 64', 22, 26, 46, 50],
+                              ['Age 65 and up', 27, 32, 51, 56]];
+                
+                for(var i = 0; i < blocks.length; i += 1)
+                {
+                    var age = blocks[i][0], count = 0;
+                    
+                    for(var j = blocks[i][1]; j <= blocks[i][2]; j += 1)
+                    {
+                        count += demographics[j][0];
+                    }
+                    
+                    for(var j = blocks[i][3]; j <= blocks[i][4]; j += 1)
+                    {
+                        count += demographics[j][0];
+                    }
+                    
+                    count = (100 * count / population).toFixed(1);
+                    
+                    counts.push(count);
+                    ages.push(count + '% ' + age);
+                }
+                
+                var chart = new Image();
+                
+                chart.src = ['http://chart.apis.google.com/chart?cht=p',
+                             '&chs=900x150',
+                             '&chd=t:', counts.join(','),
+                             '&chl=', ages.join('|')].join('');
+                
+                return chart;
+            }
+            
+            function housingChart()
+            {
+                var counts = [], houses = [];
+                
+                var blocks = [['6 and more person households', 62, 63, 70, 71],
+                              ['4 and 5 person households', 60, 61, 68, 69],
+                              ['Three person households', 59, 59, 67, 67],
+                              ['Two person households', 58, 58, 66, 66],
+                              ['One person households', -1, -2, 65, 65]];
+                
+                for(var i = 0; i < blocks.length; i += 1)
+                {
+                    var house = blocks[i][0], count = 0;
+                    
+                    for(var j = blocks[i][1]; j <= blocks[i][2]; j += 1)
+                    {
+                        count += demographics[j][0];
+                    }
+                    
+                    for(var j = blocks[i][3]; j <= blocks[i][4]; j += 1)
+                    {
+                        count += demographics[j][0];
+                    }
+                    
+                    count = (100 * count / housing).toFixed(1);
+                    
+                    counts.push(count);
+                    houses.push(count + '% ' + house);
+                }
+                
+                var chart = new Image();
+                
+                chart.src = ['http://chart.apis.google.com/chart?cht=p',
+                             '&chs=900x150',
+                             '&chd=t:', counts.join(','),
+                             '&chl=', houses.join('|')].join('');
+                
+                return chart;
+            }
+
+            $([id, '.race-chart'].join(' ')).append(raceChart());
+            $([id, '.gender-chart'].join(' ')).append(genderChart());
+            $([id, '.age-chart'].join(' ')).append(ageChart());
+            $([id, '.housing-chart'].join(' ')).append(housingChart());
+        }
     
         function onstate(o)
         {
             console.log(['state', o]);
             
-            document.getElementById('state').innerHTML = [o.Name, '-', o.Demographics[0][0], o.Demographics[0][1], '-', o.Demographics[1][0], o.Demographics[1][1]].join(' ');
+            $('#state .name').text(o.Name);
+            
+            dodemographics('#state', o.Demographics);
         }
     
         function oncounty(o)
         {
             console.log(['county', o]);
             
-            document.getElementById('county').innerHTML = [o.Name, '-', o.Demographics[0][0], o.Demographics[0][1], '-', o.Demographics[1][0], o.Demographics[1][1]].join(' ');;
+            $('#county .name').text(o.Name);
+            
+            dodemographics('#county', o.Demographics);
         }
     
         function ontract(o)
         {
             console.log(['tract', o]);
             
-            document.getElementById('tract').innerHTML = [o.Name, '-', o.Demographics[0][0], o.Demographics[0][1], '-', o.Demographics[1][0], o.Demographics[1][1]].join(' ');;
+            $('#tract .name').text(o.Name);
+            
+            dodemographics('#tract', o.Demographics);
         }
     
         function onblock(o)
         {
             console.log(['block', o]);
             
-            document.getElementById('block').innerHTML = 'Block ' + o.Block.FIPS;
+            $('#block').text('Block ' + o.Block.FIPS);
             
             if(!o.Block.FIPS.match(/^(\d{2})(\d{3})(\d{6})(\d{4})/))
             {
@@ -84,17 +248,47 @@
     <script type="text/javascript">
     <!--
         //yqlgeo.get('visitor', onlocation);
-        var loc = {'place': {'centroid': {'latitude': 37.764863, 'longitude': -122.419313}}};
         var loc = {'place': {'centroid': {'latitude': 37.804189, 'longitude': -122.263198}}};
+        var loc = {'place': {'centroid': {'latitude': 37.764863, 'longitude': -122.419313}}};
         onlocation(loc);
     //-->
     </script>
     
     <ol>
         <li id="block">…</li>
-        <li id="tract">…</li>
-        <li id="county">…</li>
-        <li id="state">…</li>
+        <li id="tract">
+            <h2 class="name">…</h2>
+            <p>
+                Population: <strong class="population-number">…</strong>.
+                Housing units: <strong class="housing-number">…</strong>.
+            </p>
+            <p class="gender-chart"></p>
+            <p class="age-chart"></p>
+            <p class="race-chart"></p>
+            <p class="housing-chart"></p>
+        </li>
+        <li id="county">
+            <h2 class="name">…</h2>
+            <p>
+                Population: <strong class="population-number">…</strong>.
+                Housing units: <strong class="housing-number">…</strong>.
+            </p>
+            <p class="gender-chart"></p>
+            <p class="age-chart"></p>
+            <p class="race-chart"></p>
+            <p class="housing-chart"></p>
+        </li>
+        <li id="state">
+            <h2 class="name">…</h2>
+            <p>
+                Population: <strong class="population-number">…</strong>.
+                Housing units: <strong class="housing-number">…</strong>.
+            </p>
+            <p class="gender-chart"></p>
+            <p class="age-chart"></p>
+            <p class="race-chart"></p>
+            <p class="housing-chart"></p>
+        </li>
     </ol>
 
 </body>
