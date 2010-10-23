@@ -24,15 +24,17 @@ from boto.s3 import Bucket
 # Housing Units
 
 values = [
+          # skipped P007001
+          # 2-
           ('P007002', 'White alone'),
-          #P007001
           ('P007003', 'Black or African American alone'),
           ('P007004', 'American Indian and Alaska Native alone'),
           ('P007005', 'Asian alone'),
           ('P007006', 'Native Hawaiian and Other Pacific Islander alone'),
           ('P007007', 'Some other race alone'),
           ('P007008', 'Two or more races'),
-          #P012001
+          # skipped P012001
+          # 9-
           ('P012002', 'Male'),
           ('P012003', 'Male under 5 years'),
           ('P012004', 'Male 5 to 9 years'),
@@ -40,10 +42,11 @@ values = [
           ('P012006', 'Male 15 to 17 years'),
           ('P012007', 'Male 18 and 19 years'),
           ('P012008', 'Male 20 years'),
+          # 16-
           ('P012009', 'Male 21 years'),
           ('P012010', 'Male 22 to 24 years'),
           ('P012011', 'Male 25 to 29 years'),
-          ('P012012', '30 to 34 years'),
+          ('P012012', 'Male 30 to 34 years'),
           ('P012013', 'Male 35 to 39 years'),
           ('P012014', 'Male 40 to 44 years'),
           ('P012015', 'Male 45 to 49 years'),
@@ -51,12 +54,14 @@ values = [
           ('P012017', 'Male 55 to 59 years'),
           ('P012018', 'Male 60 and 61 years'),
           ('P012019', 'Male 62 to 64 years'),
+          # 27-
           ('P012020', 'Male 65 and 66 years'),
           ('P012021', 'Male 67 to 69 years'),
           ('P012022', 'Male 70 to 74 years'),
           ('P012023', 'Male 75 to 79 years'),
           ('P012024', 'Male 80 to 84 years'),
           ('P012025', 'Male 85 years and over'),
+          # 33-
           ('P012026', 'Female'),
           ('P012027', 'Female under 5 years'),
           ('P012028', 'Female 5 to 9 years'),
@@ -64,6 +69,7 @@ values = [
           ('P012030', 'Female 15 to 17 years'),
           ('P012031', 'Female 18 and 19 years'),
           ('P012032', 'Female 20 years'),
+          # 40-
           ('P012033', 'Female 21 years'),
           ('P012034', 'Female 22 to 24 years'),
           ('P012035', 'Female 25 to 29 years'),
@@ -75,13 +81,15 @@ values = [
           ('P012041', 'Female 55 to 59 years'),
           ('P012042', 'Female 60 and 61 years'),
           ('P012043', 'Female 62 to 64 years'),
+          # 51-
           ('P012044', 'Female 65 and 66 years'),
           ('P012045', 'Female 67 to 69 years'),
           ('P012046', 'Female 70 to 74 years'),
           ('P012047', 'Female 75 to 79 years'),
           ('P012048', 'Female 80 to 84 years'),
           ('P012049', 'Female 85 years and over'),
-          #P026001
+          # skipped P026001
+          # 57-
           ('P026002', 'Family households'),
           ('P026003', '2-person family household'),
           ('P026004', '3-person family household'),
@@ -89,6 +97,7 @@ values = [
           ('P026006', '5-person family household'),
           ('P026007', '6-person family household'),
           ('P026008', '7-or-more-person family household'),
+          # 64-
           ('P026009', 'Nonfamily households:'),
           ('P026010', '1-person nonfamily household'),
           ('P026011', '2-person nonfamily household'),
