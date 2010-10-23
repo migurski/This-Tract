@@ -113,6 +113,9 @@ if __name__ == '__main__':
 
     for row in DictReader(stdin, dialect='excel-tab'):
     
+        if row['State FIPS'] != '06':
+            continue
+    
         demographics = [
                         (int(row['Population']), 'Population', 'P001001'),
                         (int(row['Housing Units']), 'Housing Units', 'H001001')
@@ -141,6 +144,24 @@ if __name__ == '__main__':
                       }
             
             key = 'states/%(State FIPS)s.json' % row
+
+        elif row['Summary Level'] == '050':
+            #
+            # A county
+            #
+            content = {
+                       'Name': row['Name'],
+                       'FIPS': row['County FIPS'],
+                       'Summary Level': row['Summary Level'],
+                       'State': 'http://%s.s3.amazonaws.com/states/%s.json' % (bucket, row['State FIPS']),
+                       'Geography': geography,
+                       'Demographics': demographics
+                      }
+            
+            key = 'counties/%(State FIPS)s/%(County FIPS)s.json' % row
+            
+        else:
+            raise Exception('Not sure what to do with summary level "%(Summary Level)s"' % row)
         
         content_arr = []
         float_pat = compile(r'^-?\d+\.\d+$')
