@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <script src="http://isithackday.com/hacks/geo/yql-geo-library/yqlgeo.js" type="text/javascript"></script>
+	<title>Innit</title>
+    <script type="text/javascript">
+    <!--
+    
+        function onstate(o)
+        {
+            console.log(['state', o]);
+            
+            document.getElementById('state').innerHTML = [o.Name, '-', o.Demographics[0][0], o.Demographics[0][1], '-', o.Demographics[1][0], o.Demographics[1][1]].join(' ');
+        }
+    
+        function oncounty(o)
+        {
+            console.log(['county', o]);
+            
+            document.getElementById('county').innerHTML = [o.Name, '-', o.Demographics[0][0], o.Demographics[0][1], '-', o.Demographics[1][0], o.Demographics[1][1]].join(' ');;
+        }
+    
+        function ontract(o)
+        {
+            console.log(['tract', o]);
+            
+            document.getElementById('tract').innerHTML = [o.Name, '-', o.Demographics[0][0], o.Demographics[0][1], '-', o.Demographics[1][0], o.Demographics[1][1]].join(' ');;
+        }
+    
+        function onblock(o)
+        {
+            console.log(['block', o]);
+            
+            document.getElementById('block').innerHTML = 'Block ' + o.Block.FIPS;
+            
+            if(!o.Block.FIPS.match(/^(\d{2})(\d{3})(\d{6})(\d{4})/))
+            {
+                console.log([o.Block.FIPS, '?!']);
+                return;
+            }
+            
+            var tract = o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6}).+$/, 'http://this-tract.s3.amazonaws.com/tracts/$1/$2/$3.json');
+            var county = o.Block.FIPS.replace(/^(\d{2})(\d{3}).+$/, 'http://this-tract.s3.amazonaws.com/counties/$1/$2.json');
+            var state = o.Block.FIPS.replace(/^(\d{2}).+$/, 'http://this-tract.s3.amazonaws.com/states/$1.json');
+            
+            console.log(tract);
+            console.log(county);
+            console.log(county);
+
+            var script = document.createElement('script');
+            script.src = 'slimjim.php?callback=ontract&url=' + escape(tract);
+            document.body.appendChild(script);
+
+            var script = document.createElement('script');
+            script.src = 'slimjim.php?callback=oncounty&url=' + escape(county);
+            document.body.appendChild(script);
+
+            var script = document.createElement('script');
+            script.src = 'slimjim.php?callback=onstate&url=' + escape(state);
+            document.body.appendChild(script);
+        }
+
+        function onlocation(o)
+        {
+            console.log(o);
+
+            var url = ['http://data.fcc.gov/api/block/2000/find',
+                       '?format=jsonp',
+                       '&callback=onblock',
+                       '&latitude=', o.place.centroid.latitude,
+                       '&longitude=', o.place.centroid.longitude];
+
+            var script = document.createElement('script');
+            script.src = url.join('');
+            document.body.appendChild(script);
+        }
+
+    //-->
+    </script>
+</head>
+<body>
+
+    <script type="text/javascript">
+    <!--
+        //yqlgeo.get('visitor', onlocation);
+        var loc = {'place': {'centroid': {'latitude': 37.764863, 'longitude': -122.419313}}};
+        var loc = {'place': {'centroid': {'latitude': 37.804189, 'longitude': -122.263198}}};
+        onlocation(loc);
+    //-->
+    </script>
+    
+    <ol>
+        <li id="block">…</li>
+        <li id="tract">…</li>
+        <li id="county">…</li>
+        <li id="state">…</li>
+    </ol>
+
+</body>
+</html>
