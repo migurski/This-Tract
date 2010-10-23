@@ -160,6 +160,21 @@ if __name__ == '__main__':
             
             key = 'counties/%(State FIPS)s/%(County FIPS)s.json' % row
             
+        elif row['Summary Level'] == '871':
+            #
+            # A zip code
+            #
+            content = {
+                       'Name': row['Name'],
+                       'Zip': row['Zip'],
+                       'Summary Level': row['Summary Level'],
+                       'State': 'http://%s.s3.amazonaws.com/states/%s.json' % (bucket, row['State FIPS']),
+                       'Geography': geography,
+                       'Demographics': demographics
+                      }
+            
+            key = 'zips/%(State FIPS)s/%(Zip)s.json' % row
+            
         else:
             raise Exception('Not sure what to do with summary level "%(Summary Level)s"' % row)
         
