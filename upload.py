@@ -120,17 +120,15 @@ if __name__ == '__main__':
 
     s3 = Bucket(S3Connection(access, secret), bucket)
     
-    print >> stderr, 'GeoJSON...',
+    if len(argv) >= 3:
+        print >> stderr, 'GeoJSON...',
+        
+        geojson = load(open(argv[2], 'r'))
+        geometries = dict( [('%(STATE)s%(COUNTY)s%(TRACT)s' % f['properties'], f['geometry']) for f in geojson['features']] )
     
-    geojson = load(open(argv[2], 'r'))
-    geometries = dict( [('%(STATE)s%(COUNTY)s%(TRACT)s' % f['properties'], f['geometry']) for f in geojson['features']] )
-
-    print >> stderr, '.'
+        print >> stderr, '.'
     
     for row in DictReader(stdin, dialect='excel-tab'):
-    
-        if row['State FIPS'] != '06':
-            continue
     
         demographics = [
                         (int(row['Population']), 'Population', 'P001001'),
