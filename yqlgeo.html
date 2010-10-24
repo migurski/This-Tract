@@ -391,20 +391,86 @@
             document.body.appendChild(script);
         }
 
+        function onPlaceSearch(o)
+        {
+            console.log(o);
+            
+            if(o.results.length)
+            {
+                var latlon = o.results[0].locations[0].latLng;
+                var center = {'latitude': latlon.lat, 'longitude': latlon.lng};
+                onlocation({'place': {'centroid': center}});
+            }
+        }
+        
     //-->
     </script>
 </head>
 <body>
 
+    <form method="get">
+        <input type="text" name="q" id="location-q" size="40" value="">
+        <input type="submit">
+    </form>
+    
     <script type="text/javascript">
     <!--
-        //yqlgeo.get('visitor', onlocation);
-        var loc = {'place': {'centroid': {'latitude': 37.804372, 'longitude': -122.270803}}}; // downtown
-        var loc = {'place': {'centroid': {'latitude': 37.764863, 'longitude': -122.419313}}}; // 16th & mission
-        var loc = {'place': {'centroid': {'latitude': 37.804189, 'longitude': -122.263198}}}; // 17th & jackson
-        var loc = {'place': {'centroid': {'latitude': 41.322508, 'longitude': -72.911131}}}; // orange st.
-        var loc = {'place': {'centroid': {'latitude': 40.60274481122281, 'longitude': -75.44689178466797}}}; // testing
-        onlocation(loc);
+        var getlocation = true;
+        
+        if(location.search.match(/^\?/))
+        {
+            var parts = location.search.substr(1).split('&');
+            
+            for(var i = 0; i < parts.length; i += 1)
+            {
+                if(parts[i].match(/^q=.+$/))
+                {
+                    var q = unescape(parts[i].substr(2).replace(/\+/g, '%20'));
+                    
+                    if(q.match(/^\s*-?\d+(\.\d+)?[\,\s]+-?\d+(\.\d+)?\s*$/))
+                    {
+                        q = q.replace(/^\s*(\S.+\S)\s*$/, '$1');
+                        var latlon = q.split(/[\,\s]+/);
+                        latlon = [parseFloat(latlon[0]), parseFloat(latlon[1])];
+                        q = latlon[0].toFixed(6) + ', ' + latlon[1].toFixed(6);
+                        var loc = {'place': {'centroid': {'latitude': latlon[0], 'longitude': latlon[1]}}};
+                        onlocation(loc);
+
+                    } else {
+                        var appid = 'Dmjtd|lu612007nq,20=o5-50zah';
+                        //var appid = unescape('Fmjtd%7Cluu7nu0rn0%2Cag%3Do5-5z1xq');
+                        
+                        var url = ['http://www.mapquestapi.com/geocoding/v1/address',
+                                   '?inFormat=kvp&outFormat=json',
+                                   '&key=' + escape(appid),
+                                   '&location=' + escape(q),
+                                   '&callback=onPlaceSearch'];
+            
+                        var script = document.createElement('script');
+                        script.src = url.join('');
+                        document.body.appendChild(script);
+                    }
+                    
+                    document.getElementById('location-q').value = q;
+                    
+                    getlocation = false;
+                    break;
+                }
+            }
+        }
+        
+        if(getlocation)
+        {
+            /*
+            yqlgeo.get('visitor', onlocation);
+            */
+            var loc = {'place': {'centroid': {'latitude': 40.60274481122281, 'longitude': -75.44689178466797}}}; // testing
+            var loc = {'place': {'centroid': {'latitude': 37.804372, 'longitude': -122.270803}}}; // downtown
+            var loc = {'place': {'centroid': {'latitude': 37.764863, 'longitude': -122.419313}}}; // 16th & mission
+            var loc = {'place': {'centroid': {'latitude': 37.804189, 'longitude': -122.263198}}}; // 17th & jackson
+            onlocation(loc);
+        }
+
     //-->
     </script>
     
