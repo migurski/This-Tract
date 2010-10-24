@@ -25,16 +25,29 @@
             font-weight: bold;
         }
         
+        dd
+        {
+            color: #31a354;
+        }
+        
         h2, dd, p
         {
             margin-bottom: 1em;
         }
         
-        h2, dt, dd
+        h2, dt, dd, p
         {
             text-align: center;
             margin-left: 0;
             width: 900px;
+        }
+        
+        sup
+        {
+            vertical-align: baseline;
+            position: relative;
+            font-size: .65em;
+            bottom: .5em;
         }
         
         #block { display: none; }
@@ -44,10 +57,10 @@
 
         #tract-map
         {
-            border: 1px solid rgba(194, 103, 0, .2);
+            /* border: 1px solid rgba(49, 163, 84, .2); */
             margin-left: 100px;
             width: 700px;
-            height: 500px;
+            height: 600px;
         }
 
     -->
@@ -57,6 +70,11 @@
     
         function bigNumber(value)
         {
+            if(value < 10)
+            {
+                return value.toFixed(1);
+            }
+        
             var valueText = value.toFixed(0);
             
             while(valueText.match(/\d{4}\b/))
@@ -79,9 +97,9 @@
             {
                 var counts = [], races = [];
                 
-                for(var i = 8; i >= 2; i -= 1)
+                for(var i = 2; i <= 8; i += 1)
                 {
-                    var count = (100 * demographics[i][0] / population).toFixed(1);
+                    var count = bigNumber(100 * demographics[i][0] / population);
     
                     counts.push(count);
                     races.push(escape(count + '% ' + demographics[i][1]));
@@ -91,6 +109,7 @@
     
                 chart.src = ['http://chart.apis.google.com/chart?cht=p',
                              '&chs=900x150',
+                             '&chco=9c9ede|7375b5|4a5584|cedb9c|b5cf6b|8ca252|637939',
                              '&chd=t:', counts.join(','),
                              '&chl=', races.join('|')].join('');
                 
@@ -110,6 +129,7 @@
                 
                 chart.src = ['http://chart.apis.google.com/chart?cht=p',
                              '&chs=900x100',
+                             '&chco=c2e699|31a354',
                              '&chd=t:', counts.join(','),
                              '&chl=', genders.join('|')].join('');
                 
@@ -140,7 +160,7 @@
                         count += demographics[j][0];
                     }
                     
-                    count = (100 * count / population).toFixed(1);
+                    count = bigNumber(100 * count / population);
                     
                     counts.push(count);
                     ages.push(count + '% ' + age);
@@ -150,6 +170,7 @@
                 
                 chart.src = ['http://chart.apis.google.com/chart?cht=p',
                              '&chs=900x150',
+                             '&chco=ffffcc|c2e699|78c679|31a354|006837',
                              '&chd=t:', counts.join(','),
                              '&chl=', ages.join('|')].join('');
                 
@@ -180,7 +201,7 @@
                         count += demographics[j][0];
                     }
                     
-                    count = (100 * count / housing).toFixed(1);
+                    count = bigNumber(100 * count / housing);
                     
                     counts.push(count);
                     houses.push(count + '% ' + house);
@@ -190,6 +211,7 @@
                 
                 chart.src = ['http://chart.apis.google.com/chart?cht=p',
                              '&chs=900x150',
+                             '&chco=006837|31a354|78c679|c2e699|ffffcc',
                              '&chd=t:', counts.join(','),
                              '&chl=', houses.join('|')].join('');
                 
@@ -201,61 +223,51 @@
             $([id, '.age-chart'].join(' ')).append(ageChart());
             $([id, '.housing-chart'].join(' ')).append(housingChart());
         }
-    
-        function onstate(o)
+        
+        function domap(id, geometry)
         {
-            console.log(['state', o]);
-            
-            $('#state .name').text(o.Name);
-            
-            dodemographics('#state', o.Demographics);
-        }
-    
-        function oncounty(o)
-        {
-            console.log(['county', o]);
-            
-            $('#county .name').text(o.Name);
-            
-            dodemographics('#county', o.Demographics);
-        }
-    
-        function ontract(o)
-        {
-            var mm = com.modestmaps;
-            
-            console.log(['tract', o]);
-            
-            $('#tract .name').text(o.Name);
+            var width = 700, height = 600, mm = com.modestmaps;
             
             var locations = [], points = [];
             
-            for(var i = 0; i < o.Geography.geometry.coordinates[0].length; i += 1)
+            for(var i = 0; i < geometry.coordinates[0].length; i += 1)
             {
-                var coord = o.Geography.geometry.coordinates[0][i];
+                var coord = geometry.coordinates[0][i];
                 locations.push(new mm.Location(coord[1], coord[0]));
             }
             
             var template = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/{Z}/{X}/{Y}.png';
             var provider = new mm.TemplatedMapProvider(template);
-            var element = document.getElementById('tract-map');
-            var map = new mm.Map(element, provider, new mm.Point(700, 500), []);
-            //map.setCenterZoom(new mm.Location(o.Geography.Latitude, o.Geography.Longitude), 15);
+            var element = document.getElementById(id);
+            var map = new mm.Map(element, provider, new mm.Point(width, height), []);
             map.setExtent(locations);
             map.draw();
             
+            var ymin = height, ymax = 0;
+            
             for(var i = 0; i < locations.length; i += 1)
             {
-                points.push(map.locationPoint(locations[i]));
+                var point = map.locationPoint(locations[i]);
+                points.push(point);
+                
+                ymin = Math.min(ymin, point.y);
+                ymax = Math.max(ymax, point.y);
+            }
+            
+            height = Math.ceil(4 + ymax - ymin);
+            
+            map.setSize(width, height);
+            
+            for(var i = 0; i < locations.length; i += 1)
+            {
+                points[i] = map.locationPoint(locations[i]);
             }
             
             var canvas = document.createElement('canvas');
             canvas.style.position = 'absolute';
-            canvas.width = 700;
-            canvas.height = 500;
+            canvas.width = width;
+            canvas.height = height;
             map.parent.appendChild(canvas);
-            
-            console.log(['map', map]);
             
             var ctx = canvas.getContext('2d');
             
@@ -263,13 +275,13 @@
             {
                 var start = points[points.length - 1];
                 
-                ctx.fillStyle = 'rgba(255, 255, 255, .8)';
+                ctx.fillStyle = 'rgba(255, 255, 255, 1)';
                 ctx.beginPath();
                 
                 ctx.moveTo(0, 0);
-                ctx.lineTo(0, 500);
-                ctx.lineTo(700, 500);
-                ctx.lineTo(700, 0);
+                ctx.lineTo(0, height);
+                ctx.lineTo(width, height);
+                ctx.lineTo(width, 0);
                 ctx.lineTo(0, 0);
 
                 ctx.moveTo(start.x, start.y);
@@ -282,7 +294,7 @@
                 ctx.closePath();
                 ctx.fill();
                 
-                ctx.strokeStyle = 'rgba(194, 103, 0, 1)';
+                ctx.strokeStyle = 'rgba(49, 163, 84, 1)';
                 
                 ctx.moveTo(start.x, start.y);
                 ctx.beginPath();
@@ -295,8 +307,40 @@
                 ctx.closePath();
                 ctx.stroke();
             }
+        }
+    
+        function onstate(o)
+        {
+            console.log(['state', o]);
+            
+            $('#state .name').text(o.Name);
+            $('#state .landarea-number').html(bigNumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+            $('#state .waterarea-number').html(bigNumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+            
+            dodemographics('#state', o.Demographics);
+        }
+    
+        function oncounty(o)
+        {
+            console.log(['county', o]);
+            
+            $('#county .name').text(o.Name);
+            $('#county .landarea-number').html(bigNumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+            $('#county .waterarea-number').html(bigNumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+            
+            dodemographics('#county', o.Demographics);
+        }
+    
+        function ontract(o)
+        {
+            console.log(['tract', o]);
+            
+            $('#tract .name').text(o.Name);
+            $('#tract .landarea-number').html(bigNumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+            $('#tract .waterarea-number').html(bigNumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
             
             dodemographics('#tract', o.Demographics);
+            domap('tract-map', o.Geography.geometry);
         }
     
         function onblock(o)
@@ -354,7 +398,13 @@
 
     <script type="text/javascript">
     <!--
-        yqlgeo.get('visitor', onlocation);
+        //yqlgeo.get('visitor', onlocation);
+        var loc = {'place': {'centroid': {'latitude': 37.804372, 'longitude': -122.270803}}}; // downtown
+        var loc = {'place': {'centroid': {'latitude': 37.764863, 'longitude': -122.419313}}}; // 16th & mission
+        var loc = {'place': {'centroid': {'latitude': 37.804189, 'longitude': -122.263198}}}; // 17th & jackson
+        var loc = {'place': {'centroid': {'latitude': 41.322508, 'longitude': -72.911131}}}; // orange st.
+        var loc = {'place': {'centroid': {'latitude': 40.60274481122281, 'longitude': -75.44689178466797}}}; // testing
+        onlocation(loc);
     //-->
     </script>
     
@@ -368,6 +418,8 @@
             <dl>
                 <dt>Population</dt><dd class="population-number">…</dd>
                 <dt>Housing units</dt><dd class="housing-number">…</dd>
+                <dt>Land Area</dt><dd class="landarea-number">…</dd>
+                <dt>Water Area</dt><dd class="waterarea-number">…</dd>
             </dl>
             <p class="gender-chart"></p>
             <p class="age-chart"></p>
@@ -379,6 +431,8 @@
             <dl>
                 <dt>Population</dt><dd class="population-number">…</dd>
                 <dt>Housing units</dt><dd class="housing-number">…</dd>
+                <dt>Land Area</dt><dd class="landarea-number">…</dd>
+                <dt>Water Area</dt><dd class="waterarea-number">…</dd>
             </dl>
             <p class="gender-chart"></p>
             <p class="age-chart"></p>
@@ -390,6 +444,8 @@
             <dl>
                 <dt>Population</dt><dd class="population-number">…</dd>
                 <dt>Housing units</dt><dd class="housing-number">…</dd>
+                <dt>Land Area</dt><dd class="landarea-number">…</dd>
+                <dt>Water Area</dt><dd class="waterarea-number">…</dd>
             </dl>
             <p class="gender-chart"></p>
             <p class="age-chart"></p>
