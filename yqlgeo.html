@@ -12,6 +12,8 @@
         body
         {
             font-family: Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.4em;
         }
         
         ol li
@@ -19,10 +21,21 @@
             list-style-type: none;
         }
         
-        h2, dd
+        ol, li
+        {
+            margin: 0;
+            padding: 0;
+        }
+        
+        h1, h2, dd
         {
             font-size: 2em;
             font-weight: bold;
+        }
+        
+        h3
+        {
+            font-size: 1.4em;
         }
         
         dd
@@ -30,12 +43,17 @@
             color: #31a354;
         }
         
-        h2, dd, p
+        h1, h2, h3, dd, p
         {
             margin-bottom: 1em;
         }
         
-        h2, dt, dd, p
+        h3
+        {
+            margin-top: -1em;
+        }
+        
+        h1, h2, h3, dt, dd, p, form
         {
             text-align: center;
             margin-left: 0;
@@ -50,8 +68,6 @@
             bottom: .5em;
         }
         
-        #block { display: none; }
-        
         .gender-chart { height: 100px; }
         .age-chart, .race-chart, .housing-chart { height: 150px; }
 
@@ -60,7 +76,7 @@
             /* border: 1px solid rgba(49, 163, 84, .2); */
             margin-left: 100px;
             width: 700px;
-            height: 600px;
+            height: 100px;
         }
 
     -->
@@ -68,7 +84,7 @@
     <script type="text/javascript">
     <!--
     
-        function bigNumber(value)
+        function nicenumber(value)
         {
             if(value < 10)
             {
@@ -90,8 +106,8 @@
             var population = demographics[0][0];
             var housing = demographics[1][0];
             
-            $([id, '.population-number'].join(' ')).text(bigNumber(population));
-            $([id, '.housing-number'].join(' ')).text(bigNumber(housing));
+            $([id, '.population-number'].join(' ')).text(nicenumber(population));
+            $([id, '.housing-number'].join(' ')).text(nicenumber(housing));
             
             function raceChart()
             {
@@ -99,7 +115,7 @@
                 
                 for(var i = 2; i <= 8; i += 1)
                 {
-                    var count = bigNumber(100 * demographics[i][0] / population);
+                    var count = nicenumber(100 * demographics[i][0] / population);
     
                     counts.push(count);
                     races.push(escape(count + '% ' + demographics[i][1]));
@@ -160,7 +176,7 @@
                         count += demographics[j][0];
                     }
                     
-                    count = bigNumber(100 * count / population);
+                    count = nicenumber(100 * count / population);
                     
                     counts.push(count);
                     ages.push(count + '% ' + age);
@@ -201,7 +217,7 @@
                         count += demographics[j][0];
                     }
                     
-                    count = bigNumber(100 * count / housing);
+                    count = nicenumber(100 * count / housing);
                     
                     counts.push(count);
                     houses.push(count + '% ' + house);
@@ -224,7 +240,7 @@
             $([id, '.housing-chart'].join(' ')).append(housingChart());
         }
         
-        function domap(id, geometry)
+        function domap(id, geometry, latlon)
         {
             var width = 700, height = 600, mm = com.modestmaps;
             
@@ -254,7 +270,7 @@
                 ymax = Math.max(ymax, point.y);
             }
             
-            height = Math.ceil(4 + ymax - ymin);
+            height = Math.ceil(21 + ymax - ymin);
             
             map.setSize(width, height);
             
@@ -307,180 +323,240 @@
                 ctx.closePath();
                 ctx.stroke();
             }
+            
+            var location = new mm.Location(latlon[0], latlon[1]);
+            var point = map.locationPoint(location);
+            
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = 'rgba(49, 163, 84, 1)';
+            ctx.lineWidth = 1;
+
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 10, 0, Math.PI*2, false);
+            ctx.closePath();
+
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.fillStyle = '#000';
+
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 3, 0, Math.PI*2, false);
+            ctx.closePath();
+
+            ctx.fill();
         }
-    
-        function onstate(o)
+
+        function tractfinder()
         {
-            console.log(['state', o]);
-            
-            $('#state .name').text(o.Name);
-            $('#state .landarea-number').html(bigNumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
-            $('#state .waterarea-number').html(bigNumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
-            
-            dodemographics('#state', o.Demographics);
-        }
-    
-        function oncounty(o)
-        {
-            console.log(['county', o]);
-            
-            $('#county .name').text(o.Name);
-            $('#county .landarea-number').html(bigNumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
-            $('#county .waterarea-number').html(bigNumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
-            
-            dodemographics('#county', o.Demographics);
-        }
-    
-        function ontract(o)
-        {
-            console.log(['tract', o]);
-            
-            $('#tract .name').text(o.Name);
-            $('#tract .landarea-number').html(bigNumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
-            $('#tract .waterarea-number').html(bigNumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
-            
-            dodemographics('#tract', o.Demographics);
-            domap('tract-map', o.Geography.geometry);
-        }
-    
-        function onblock(o)
-        {
-            console.log(['block', o]);
-            
-            $('#block .name').text('Block ' + o.Block.FIPS);
-    
-            if(!o.Block.FIPS.match(/^(\d{2})(\d{3})(\d{6})(\d{4})/))
+            var latitude = undefined, longitude = undefined;
+        
+            function onlocation(o)
             {
-                console.log([o.Block.FIPS, '?!']);
-                return;
+                console.log(o);
+                
+                latitude = o.place.centroid.latitude;
+                longitude = o.place.centroid.longitude;
+                
+                window['onblock'] = onblock;
+    
+                var url = ['http://data.fcc.gov/api/block/2000/find',
+                           '?format=jsonp',
+                           '&latitude=', latitude.toFixed(7),
+                           '&longitude=', longitude.toFixed(7),
+                           '&callback=?'];
+    
+                $.ajax({
+                    dataType: 'jsonp',
+                    url: url.join(''),
+                    success: onblock
+                });
+            }
+        
+            function onblock(o)
+            {
+                console.log(['block', o]);
+                
+                if(!o.Block.FIPS.match(/^(\d{2})(\d{3})(\d{6})(\d{4})/))
+                {
+                    console.log([o.Block.FIPS, '?!']);
+                    return;
+                }
+                
+                $('#block .name').text('Block ' + o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6})(\d{4})$/, '$1.$2.$3.$4'));
+        
+                var tract = o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6}).+$/, 'http://this-tract.s3.amazonaws.com/tracts/$1/$2/$3.json');
+                var county = o.Block.FIPS.replace(/^(\d{2})(\d{3}).+$/, 'http://this-tract.s3.amazonaws.com/counties/$1/$2.json');
+                var state = o.Block.FIPS.replace(/^(\d{2}).+$/, 'http://this-tract.s3.amazonaws.com/states/$1.json');
+                
+                console.log(tract);
+                console.log(county);
+                console.log(county);
+
+                $.ajax({
+                    dataType: 'jsonp',
+                    url: 'slimjim.php?url=' + escape(tract) + '&callback=?',
+                    success: ontract
+                });
+                
+                $.ajax({
+                    dataType: 'jsonp',
+                    url: 'slimjim.php?url=' + escape(county) + '&callback=?',
+                    success: oncounty
+                });
+                
+                $.ajax({
+                    dataType: 'jsonp',
+                    url: 'slimjim.php?url=' + escape(state) + '&callback=?',
+                    success: onstate
+                });
+                
+                window['oncounty'] = oncounty;
+                window['onstate'] = onstate;
+            }
+        
+            function ontract(o)
+            {
+                console.log(['tract', o]);
+                
+                $('#tract .name').text(o.Name);
+                $('#block .tract-name').text(o.Name);
+                $('#tract .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+                $('#tract .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+                
+                dodemographics('#tract', o.Demographics);
+                domap('tract-map', o.Geography.geometry, [latitude, longitude]);
+            }
+        
+            function oncounty(o)
+            {
+                console.log(['county', o]);
+                
+                $('#county .name').text(o.Name);
+                $('#block .county-name').text(o.Name);
+                $('#county .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+                $('#county .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+                
+                dodemographics('#county', o.Demographics);
+            }
+        
+            function onstate(o)
+            {
+                console.log(['state', o]);
+                
+                $('#state .name').text(o.Name);
+                $('#block .state-name').text(o.Name);
+                $('#state .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+                $('#state .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+                
+                dodemographics('#state', o.Demographics);
+            }
+    
+            function onLatLonQuery(q)
+            {
+                q = q.replace(/^\s*(\S.+\S)\s*$/, '$1');
+                var latlon = q.split(/[\,\s]+/);
+                latlon = [parseFloat(latlon[0]), parseFloat(latlon[1])];
+                q = latlon[0].toFixed(6) + ', ' + latlon[1].toFixed(6);
+                var loc = {'place': {'centroid': {'latitude': latlon[0], 'longitude': latlon[1]}}};
+                onlocation(loc);
+                
+                return q;
             }
             
-            var tract = o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6}).+$/, 'http://this-tract.s3.amazonaws.com/tracts/$1/$2/$3.json');
-            var county = o.Block.FIPS.replace(/^(\d{2})(\d{3}).+$/, 'http://this-tract.s3.amazonaws.com/counties/$1/$2.json');
-            var state = o.Block.FIPS.replace(/^(\d{2}).+$/, 'http://this-tract.s3.amazonaws.com/states/$1.json');
-            
-            console.log(tract);
-            console.log(county);
-            console.log(county);
-
-            var script = document.createElement('script');
-            script.src = 'slimjim.php?callback=ontract&url=' + escape(tract);
-            document.body.appendChild(script);
-
-            var script = document.createElement('script');
-            script.src = 'slimjim.php?callback=oncounty&url=' + escape(county);
-            document.body.appendChild(script);
-
-            var script = document.createElement('script');
-            script.src = 'slimjim.php?callback=onstate&url=' + escape(state);
-            document.body.appendChild(script);
-        }
-
-        function onlocation(o)
-        {
-            console.log(o);
-
-            var url = ['http://data.fcc.gov/api/block/2000/find',
-                       '?format=jsonp',
-                       '&callback=onblock',
-                       '&latitude=', o.place.centroid.latitude,
-                       '&longitude=', o.place.centroid.longitude];
-
-            var script = document.createElement('script');
-            script.src = url.join('');
-            document.body.appendChild(script);
-        }
-
-        function onPlaceSearch(o)
-        {
-            console.log(o);
-            
-            if(o.results.length)
+            function onPlaceSearch(o)
             {
-                var latlon = o.results[0].locations[0].latLng;
-                var center = {'latitude': latlon.lat, 'longitude': latlon.lng};
-                onlocation({'place': {'centroid': center}});
+                console.log(o);
+                
+                if(o.results.length)
+                {
+                    var latlon = o.results[0].locations[0].latLng;
+                    var center = {'latitude': latlon.lat, 'longitude': latlon.lng};
+                    onlocation({'place': {'centroid': center}});
+                }
             }
+            
+            function onSearchQuery(q)
+            {
+                var appid = 'Dmjtd|lu612007nq,20=o5-50zah';
+                //var appid = unescape('Fmjtd%7Cluu7nu0rn0%2Cag%3Do5-5z1xq');
+                
+                var url = ['http://www.mapquestapi.com/geocoding/v1/address',
+                           '?inFormat=kvp&outFormat=json',
+                           '&key=' + escape(appid),
+                           '&location=' + escape(q),
+                           '&callback=?'];
+                
+                $.ajax({
+                    dataType: 'jsonp',
+                    url: url.join(''),
+                    success: onPlaceSearch
+                });
+                
+                return q;
+            }
+            
+            function start()
+            {
+                if(location.search.match(/^\?/))
+                {
+                    var parts = location.search.substr(1).split('&');
+                    
+                    for(var i = 0; i < parts.length; i += 1)
+                    {
+                        if(parts[i].match(/^q=.+$/))
+                        {
+                            var q = unescape(parts[i].substr(2).replace(/\+/g, '%20'));
+                            
+                            if(q.match(/^\s*-?\d+(\.\d+)?[\,\s]+-?\d+(\.\d+)?\s*$/)) {
+                                q = onLatLonQuery(q);
+        
+                            } else {
+                                q = onSearchQuery(q);
+                            }
+                            
+                            document.getElementById('location-q').value = q;
+                            return;
+                        }
+                    }
+                }
+                
+                /*
+                var loc = {'place': {'centroid': {'latitude': 40.60274481122281, 'longitude': -75.44689178466797}}}; // testing
+                var loc = {'place': {'centroid': {'latitude': 37.804372, 'longitude': -122.270803}}}; // downtown
+                var loc = {'place': {'centroid': {'latitude': 37.764863, 'longitude': -122.419313}}}; // 16th & mission
+                var loc = {'place': {'centroid': {'latitude': 37.804189, 'longitude': -122.263198}}}; // 17th & jackson
+                onlocation(loc);
+                */
+
+                yqlgeo.get('visitor', onlocation);
+            }
+            
+            return {start: start};
         }
         
     //-->
     </script>
 </head>
-<body>
+<body onload="tractfinder().start();">
 
-    <form method="get">
-        <input type="text" name="q" id="location-q" size="40" value="">
-        <input type="submit">
+    <form method="get" action="yqlgeo.html">
+        <input type="search" name="q" id="location-q" size="40" value="">
+        <input type="submit" value="Search">
     </form>
-    
-    <script type="text/javascript">
-    <!--
-        var getlocation = true;
-        
-        if(location.search.match(/^\?/))
-        {
-            var parts = location.search.substr(1).split('&');
-            
-            for(var i = 0; i < parts.length; i += 1)
-            {
-                if(parts[i].match(/^q=.+$/))
-                {
-                    var q = unescape(parts[i].substr(2).replace(/\+/g, '%20'));
-                    
-                    if(q.match(/^\s*-?\d+(\.\d+)?[\,\s]+-?\d+(\.\d+)?\s*$/))
-                    {
-                        q = q.replace(/^\s*(\S.+\S)\s*$/, '$1');
-                        var latlon = q.split(/[\,\s]+/);
-                        latlon = [parseFloat(latlon[0]), parseFloat(latlon[1])];
-                        q = latlon[0].toFixed(6) + ', ' + latlon[1].toFixed(6);
-                        var loc = {'place': {'centroid': {'latitude': latlon[0], 'longitude': latlon[1]}}};
-                        onlocation(loc);
-
-                    } else {
-                        var appid = 'Dmjtd|lu612007nq,20=o5-50zah';
-                        //var appid = unescape('Fmjtd%7Cluu7nu0rn0%2Cag%3Do5-5z1xq');
-                        
-                        var url = ['http://www.mapquestapi.com/geocoding/v1/address',
-                                   '?inFormat=kvp&outFormat=json',
-                                   '&key=' + escape(appid),
-                                   '&location=' + escape(q),
-                                   '&callback=onPlaceSearch'];
-            
-                        var script = document.createElement('script');
-                        script.src = url.join('');
-                        document.body.appendChild(script);
-                    }
-                    
-                    document.getElementById('location-q').value = q;
-                    
-                    getlocation = false;
-                    break;
-                }
-            }
-        }
-        
-        if(getlocation)
-        {
-            /*
-            yqlgeo.get('visitor', onlocation);
-            */
-            var loc = {'place': {'centroid': {'latitude': 40.60274481122281, 'longitude': -75.44689178466797}}}; // testing
-            var loc = {'place': {'centroid': {'latitude': 37.804372, 'longitude': -122.270803}}}; // downtown
-            var loc = {'place': {'centroid': {'latitude': 37.764863, 'longitude': -122.419313}}}; // 16th & mission
-            var loc = {'place': {'centroid': {'latitude': 37.804189, 'longitude': -122.263198}}}; // 17th & jackson
-            onlocation(loc);
-        }
-
-    //-->
-    </script>
     
     <ol>
         <li id="block">
-            <h2 class="name">…</h2>
+            <h1 class="name">…</h1>
+            <h3>
+                <a href="#tract-text" class="tract-name">…</a>,
+                <a href="#county-text" class="county-name">…</a>,
+                <a href="#state-text" class="state-name">…</a>
+            </h3>
         </li>
         <li id="tract">
             <div id="tract-map"></div>
-            <h2 class="name">…</h2>
+            <h2><a name="tract-text" class="name">…</a></h2>
             <dl>
                 <dt>Population</dt><dd class="population-number">…</dd>
                 <dt>Housing units</dt><dd class="housing-number">…</dd>
@@ -493,7 +569,7 @@
             <p class="housing-chart"></p>
         </li>
         <li id="county">
-            <h2 class="name">…</h2>
+            <h2><a name="county-text" class="name">…</a></h2>
             <dl>
                 <dt>Population</dt><dd class="population-number">…</dd>
                 <dt>Housing units</dt><dd class="housing-number">…</dd>
@@ -506,7 +582,7 @@
             <p class="housing-chart"></p>
         </li>
         <li id="state">
-            <h2 class="name">…</h2>
+            <h2><a name="state-text" class="name">…</a></h2>
             <dl>
                 <dt>Population</dt><dd class="population-number">…</dd>
                 <dt>Housing units</dt><dd class="housing-number">…</dd>
