@@ -14,11 +14,41 @@
             font-family: Helvetica, Arial, sans-serif;
         }
         
+        ol li
+        {
+            list-style-type: none;
+        }
+        
+        h2, dd
+        {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        h2, dd, p
+        {
+            margin-bottom: 1em;
+        }
+        
+        h2, dt, dd
+        {
+            text-align: center;
+            margin-left: 0;
+            width: 900px;
+        }
+        
         #block { display: none; }
         
-        #tract-map { height: 400px; }
         .gender-chart { height: 100px; }
         .age-chart, .race-chart, .housing-chart { height: 150px; }
+
+        #tract-map
+        {
+            border: 1px solid rgba(194, 103, 0, .2);
+            margin-left: 100px;
+            width: 700px;
+            height: 500px;
+        }
 
     -->
     </style>
@@ -192,16 +222,79 @@
     
         function ontract(o)
         {
+            var mm = com.modestmaps;
+            
             console.log(['tract', o]);
             
             $('#tract .name').text(o.Name);
             
+            var locations = [], points = [];
+            
+            for(var i = 0; i < o.Geography.geometry.coordinates[0].length; i += 1)
+            {
+                var coord = o.Geography.geometry.coordinates[0][i];
+                locations.push(new mm.Location(coord[1], coord[0]));
+            }
+            
             var template = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/{Z}/{X}/{Y}.png';
-            var provider = new com.modestmaps.TemplatedMapProvider(template);
+            var provider = new mm.TemplatedMapProvider(template);
             var element = document.getElementById('tract-map');
-            var map = new com.modestmaps.Map(element, provider, new com.modestmaps.Point(900, 300));
-            map.setCenterZoom(new com.modestmaps.Location(o.Geography.Latitude, o.Geography.Longitude), 15);
+            var map = new mm.Map(element, provider, new mm.Point(700, 500), []);
+            //map.setCenterZoom(new mm.Location(o.Geography.Latitude, o.Geography.Longitude), 15);
+            map.setExtent(locations);
             map.draw();
+            
+            for(var i = 0; i < locations.length; i += 1)
+            {
+                points.push(map.locationPoint(locations[i]));
+            }
+            
+            var canvas = document.createElement('canvas');
+            canvas.style.position = 'absolute';
+            canvas.width = 700;
+            canvas.height = 500;
+            map.parent.appendChild(canvas);
+            
+            console.log(['map', map]);
+            
+            var ctx = canvas.getContext('2d');
+            
+            if(ctx)
+            {
+                var start = points[points.length - 1];
+                
+                ctx.fillStyle = 'rgba(255, 255, 255, .8)';
+                ctx.beginPath();
+                
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, 500);
+                ctx.lineTo(700, 500);
+                ctx.lineTo(700, 0);
+                ctx.lineTo(0, 0);
+
+                ctx.moveTo(start.x, start.y);
+                
+                for(var i = 0; i < points.length; i += 1)
+                {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.strokeStyle = 'rgba(194, 103, 0, 1)';
+                
+                ctx.moveTo(start.x, start.y);
+                ctx.beginPath();
+                
+                for(var i = 0; i < points.length; i += 1)
+                {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                
+                ctx.closePath();
+                ctx.stroke();
+            }
             
             dodemographics('#tract', o.Demographics);
         }
@@ -261,10 +354,7 @@
 
     <script type="text/javascript">
     <!--
-        //yqlgeo.get('visitor', onlocation);
-        var loc = {'place': {'centroid': {'latitude': 37.764863, 'longitude': -122.419313}}};
-        var loc = {'place': {'centroid': {'latitude': 37.804189, 'longitude': -122.263198}}};
-        onlocation(loc);
+        yqlgeo.get('visitor', onlocation);
     //-->
     </script>
     
@@ -273,12 +363,12 @@
             <h2 class="name">…</h2>
         </li>
         <li id="tract">
-            <h2 class="name">…</h2>
-            <p>
-                Population: <strong class="population-number">…</strong>.
-                Housing units: <strong class="housing-number">…</strong>.
-            </p>
             <div id="tract-map"></div>
+            <h2 class="name">…</h2>
+            <dl>
+                <dt>Population</dt><dd class="population-number">…</dd>
+                <dt>Housing units</dt><dd class="housing-number">…</dd>
+            </dl>
             <p class="gender-chart"></p>
             <p class="age-chart"></p>
             <p class="race-chart"></p>
@@ -286,10 +376,10 @@
         </li>
         <li id="county">
             <h2 class="name">…</h2>
-            <p>
-                Population: <strong class="population-number">…</strong>.
-                Housing units: <strong class="housing-number">…</strong>.
-            </p>
+            <dl>
+                <dt>Population</dt><dd class="population-number">…</dd>
+                <dt>Housing units</dt><dd class="housing-number">…</dd>
+            </dl>
             <p class="gender-chart"></p>
             <p class="age-chart"></p>
             <p class="race-chart"></p>
@@ -297,10 +387,10 @@
         </li>
         <li id="state">
             <h2 class="name">…</h2>
-            <p>
-                Population: <strong class="population-number">…</strong>.
-                Housing units: <strong class="housing-number">…</strong>.
-            </p>
+            <dl>
+                <dt>Population</dt><dd class="population-number">…</dd>
+                <dt>Housing units</dt><dd class="housing-number">…</dd>
+            </dl>
             <p class="gender-chart"></p>
             <p class="age-chart"></p>
             <p class="race-chart"></p>

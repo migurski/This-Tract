@@ -1,7 +1,7 @@
-from sys import stdin, argv
+from sys import stdin, stderr, argv
 from csv import DictReader
 from ConfigParser import ConfigParser
-from json import JSONEncoder
+from json import JSONEncoder, load
 from re import compile
 
 from boto.s3.connection import S3Connection
@@ -119,7 +119,14 @@ if __name__ == '__main__':
     bucket = cfg.get('aws', 'bucket')
 
     s3 = Bucket(S3Connection(access, secret), bucket)
+    
+    print >> stderr, 'GeoJSON...',
+    
+    geojson = load(open(argv[2], 'r'))
+    geometries = dict( [('%(STATE)s%(COUNTY)s%(TRACT)s' % f['properties'], f['geometry']) for f in geojson['features']] )
 
+    print >> stderr, '.'
+    
     for row in DictReader(stdin, dialect='excel-tab'):
     
         if row['State FIPS'] != '06':
@@ -173,9 +180,18 @@ if __name__ == '__main__':
             #
             # A tract
             #
+            fips = row['State FIPS'] + row['County FIPS'] + row['Tract']
+            
+            geography['geometry'] = None
+            
+            for key in (fips, fips[:-2]):
+                if key in geometries:
+                    geography['geometry'] = geometries[key]
+                    break
+
             content = {
                        'Name': row['Name'],
-                       'FIPS': row['State FIPS'] + row['County FIPS'] + row['Tract'],
+                       'FIPS': fips,
                        'Summary Level': row['Summary Level'],
                        'State': 'http://%s.s3.amazonaws.com/states/%s.json' % (bucket, row['State FIPS']),
                        'County': 'http://%s.s3.amazonaws.com/counties/%s/%s.json' % (bucket, row['State FIPS'], row['County FIPS']),
