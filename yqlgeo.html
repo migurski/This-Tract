@@ -78,6 +78,22 @@
             width: 700px;
             height: 100px;
         }
+        
+        #nav-map-container,
+        #nav-map-bullseye
+        {
+            position: relative;
+            width: 900px;
+            height: 400px;
+        }
+
+        #nav-map-bullseye
+        {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
 
     -->
     </style>
@@ -240,7 +256,29 @@
             $([id, '.housing-chart'].join(' ')).empty().append(housingChart());
         }
         
-        function domap(id, geometry, latlon, map, ctx)
+        function paintbullseye(ctx, x, y)
+        {
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = 'rgba(49, 163, 84, 1)';
+            ctx.lineWidth = 1;
+
+            ctx.beginPath();
+            ctx.arc(x, y, 10, 0, Math.PI*2, false);
+            ctx.closePath();
+
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.fillStyle = '#000';
+
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI*2, false);
+            ctx.closePath();
+
+            ctx.fill();
+        }
+        
+        function domap(id, geometry, latlon)
         {
             var width = 700, height = 600, mm = com.modestmaps;
             
@@ -252,14 +290,13 @@
                 locations.push(new mm.Location(coord[1], coord[0]));
             }
             
-            if(!map)
-            {
-                var template = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/{Z}/{X}/{Y}.png';
-                var provider = new mm.TemplatedMapProvider(template);
-                var element = document.getElementById(id);
-                
-                map = new mm.Map(element, provider, new mm.Point(width, height), []);
-            }
+            $('#' + id).empty();
+            
+            var template = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/{Z}/{X}/{Y}.png';
+            var provider = new mm.TemplatedMapProvider(template);
+            var element = document.getElementById(id);
+            
+            var map = new mm.Map(element, provider, new mm.Point(width, height), []);
 
             map.setSize(width, height);
             map.setExtent(locations);
@@ -285,16 +322,13 @@
                 points[i] = map.locationPoint(locations[i]);
             }
             
-            if(!ctx)
-            {
-                var canvas = document.createElement('canvas');
-                canvas.style.position = 'absolute';
-                canvas.width = width;
-                canvas.height = height;
-                map.parent.appendChild(canvas);
-                
-                ctx = canvas.getContext('2d');
-            }
+            var canvas = document.createElement('canvas');
+            canvas.style.position = 'absolute';
+            canvas.width = width;
+            canvas.height = height;
+            map.parent.appendChild(canvas);
+            
+            var ctx = canvas.getContext('2d');
             
             if(ctx)
             {
@@ -338,32 +372,12 @@
             var location = new mm.Location(latlon[0], latlon[1]);
             var point = map.locationPoint(location);
             
-            ctx.fillStyle = '#fff';
-            ctx.strokeStyle = 'rgba(49, 163, 84, 1)';
-            ctx.lineWidth = 1;
-
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, 10, 0, Math.PI*2, false);
-            ctx.closePath();
-
-            ctx.fill();
-            ctx.stroke();
-            
-            ctx.fillStyle = '#000';
-
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, 3, 0, Math.PI*2, false);
-            ctx.closePath();
-
-            ctx.fill();
-            
-            return [map, ctx];
+            paintbullseye(ctx, point.x, point.y);
         }
 
         function tractfinder()
         {
             var latitude = undefined, longitude = undefined;
-            var map = undefined, ctx = undefined;
         
             function onlocation(o)
             {
@@ -439,10 +453,7 @@
                 $('#tract .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
                 
                 dodemographics('#tract', o.Demographics);
-                var map_ctx = domap('tract-map', o.Geography.geometry, [latitude, longitude], map, ctx);
-                
-                map = map_ctx[0];
-                ctx = map_ctx[1];
+                domap('tract-map', o.Geography.geometry, [latitude, longitude]);
             }
         
             function oncounty(o)
@@ -585,7 +596,9 @@
         <input type="submit" value="Search">
     </form>
     
-    <div id="nav-map">
+    <div id="nav-map-container">
+        <div id="nav-map"></div>
+        <canvas id="nav-map-bullseye" width="900" height="400">
     </div>
     
     <script type="text/javascript">
@@ -597,9 +610,15 @@
         var map = new mm.Map(element, provider, new mm.Point(900, 400));
         map.setExtent([new mm.Location(49.3, -124.8), new mm.Location(25.8, -67.0)]);
         map.draw();
-
-        map.addCallback('zoomed', tf.getonmoved(map));
-        map.addCallback('panned', tf.getonmoved(map));
+        
+        var onmoved = tf.getonmoved(map);
+        map.addCallback('zoomed', onmoved);
+        map.addCallback('panned', onmoved);
+        
+        var canvas = document.getElementById('nav-map-bullseye');
+        var ctx = canvas.getContext('2d');
+        
+        paintbullseye(ctx, canvas.width/2, canvas.height/2);
     //-->
     </script>
     
