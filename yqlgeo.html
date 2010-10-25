@@ -234,13 +234,13 @@
                 return chart;
             }
 
-            $([id, '.race-chart'].join(' ')).append(raceChart());
-            $([id, '.gender-chart'].join(' ')).append(genderChart());
-            $([id, '.age-chart'].join(' ')).append(ageChart());
-            $([id, '.housing-chart'].join(' ')).append(housingChart());
+            $([id, '.race-chart'].join(' ')).empty().append(raceChart());
+            $([id, '.gender-chart'].join(' ')).empty().append(genderChart());
+            $([id, '.age-chart'].join(' ')).empty().append(ageChart());
+            $([id, '.housing-chart'].join(' ')).empty().append(housingChart());
         }
         
-        function domap(id, geometry, latlon)
+        function domap(id, geometry, latlon, map, ctx)
         {
             var width = 700, height = 600, mm = com.modestmaps;
             
@@ -252,10 +252,16 @@
                 locations.push(new mm.Location(coord[1], coord[0]));
             }
             
-            var template = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/{Z}/{X}/{Y}.png';
-            var provider = new mm.TemplatedMapProvider(template);
-            var element = document.getElementById(id);
-            var map = new mm.Map(element, provider, new mm.Point(width, height), []);
+            if(!map)
+            {
+                var template = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/{Z}/{X}/{Y}.png';
+                var provider = new mm.TemplatedMapProvider(template);
+                var element = document.getElementById(id);
+                
+                map = new mm.Map(element, provider, new mm.Point(width, height), []);
+            }
+
+            map.setSize(width, height);
             map.setExtent(locations);
             map.draw();
             
@@ -279,16 +285,21 @@
                 points[i] = map.locationPoint(locations[i]);
             }
             
-            var canvas = document.createElement('canvas');
-            canvas.style.position = 'absolute';
-            canvas.width = width;
-            canvas.height = height;
-            map.parent.appendChild(canvas);
-            
-            var ctx = canvas.getContext('2d');
+            if(!ctx)
+            {
+                var canvas = document.createElement('canvas');
+                canvas.style.position = 'absolute';
+                canvas.width = width;
+                canvas.height = height;
+                map.parent.appendChild(canvas);
+                
+                ctx = canvas.getContext('2d');
+            }
             
             if(ctx)
             {
+                ctx.clearRect(0, 0, width, height);
+                
                 var start = points[points.length - 1];
                 
                 ctx.fillStyle = 'rgba(255, 255, 255, 1)';
@@ -345,11 +356,14 @@
             ctx.closePath();
 
             ctx.fill();
+            
+            return [map, ctx];
         }
 
         function tractfinder()
         {
             var latitude = undefined, longitude = undefined;
+            var map = undefined, ctx = undefined;
         
             function onlocation(o)
             {
@@ -425,7 +439,10 @@
                 $('#tract .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
                 
                 dodemographics('#tract', o.Demographics);
-                domap('tract-map', o.Geography.geometry, [latitude, longitude]);
+                var map_ctx = domap('tract-map', o.Geography.geometry, [latitude, longitude], map, ctx);
+                
+                map = map_ctx[0];
+                ctx = map_ctx[1];
             }
         
             function oncounty(o)
@@ -532,18 +549,59 @@
                 yqlgeo.get('visitor', onlocation);
             }
             
-            return {start: start};
+            function getonmoved(map)
+            {
+                var timeout;
+                
+                function actually()
+                {
+                    //console.log(['center', map.getCenter()]);
+                    var loc = map.getCenter();
+                    loc = {'place': {'centroid': {'latitude': loc.lat, 'longitude': loc.lon}}};
+                    onlocation(loc);
+                }
+                
+                function moved(map)
+                {
+                    window.clearTimeout(timeout);
+                    timeout = window.setTimeout(actually, 500);
+                }
+                
+                return moved;
+            }
+            
+            return {start: start, getonmoved: getonmoved};
         }
+        
+        var tf = tractfinder();
         
     //-->
     </script>
 </head>
-<body onload="tractfinder().start();">
+<body onload="tf.start();">
 
     <form method="get" action="yqlgeo.html">
         <input type="search" name="q" id="location-q" size="40" value="">
         <input type="submit" value="Search">
     </form>
+    
+    <div id="nav-map">
+    </div>
+    
+    <script type="text/javascript">
+    <!--
+        var mm = com.modestmaps;
+        var template = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/{Z}/{X}/{Y}.png';
+        var provider = new mm.TemplatedMapProvider(template);
+        var element = document.getElementById('nav-map');
+        var map = new mm.Map(element, provider, new mm.Point(900, 400));
+        map.setExtent([new mm.Location(49.3, -124.8), new mm.Location(25.8, -67.0)]);
+        map.draw();
+
+        map.addCallback('zoomed', tf.getonmoved(map));
+        map.addCallback('panned', tf.getonmoved(map));
+    //-->
+    </script>
     
     <ol>
         <li id="block">
