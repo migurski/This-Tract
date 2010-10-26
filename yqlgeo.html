@@ -18,8 +18,10 @@
         
         ol li
         {
+            text-align: center;
             list-style-type: none;
-            width: 900px;
+            width: 100%;
+            margin-top: 1em;
         }
         
         ol, li
@@ -54,13 +56,6 @@
             margin-top: -1em;
         }
         
-        h1, h2, h3, dt, dd, p, form
-        {
-            text-align: center;
-            margin-left: 0;
-            width: 900px;
-        }
-        
         sup
         {
             vertical-align: baseline;
@@ -75,14 +70,14 @@
         #tract-map
         {
             /* border: 1px solid rgba(49, 163, 84, .2); */
-            margin-left: 100px;
+            margin: 0 auto;
             width: 700px;
             height: 100px;
         }
         
         #nav-map-container
         {
-            margin-left: 100px;
+            margin: 0 auto;
             border: 1px solid rgb(49, 163, 84);
         }
 
@@ -429,14 +424,16 @@
             return map;
         }
         
-        function togglenavmap()
+        function togglenavmap(element)
         {
             var container = $('#nav-map-container');
             
             if(container.hasClass('off')) {
+                $(element).text('Hide Map');
                 container.removeClass('off');
 
             } else {
+                $(element).text('Show Map');
                 container.addClass('off');
             }
             
@@ -680,22 +677,21 @@
     </script>
 </head>
 <body onload="tf.start();">
-    
-    <form method="get" action="yqlgeo.html">
-        <input type="search" name="q" id="location-q" size="40" value="">
-        <input type="submit" value="Search">
-    </form>
-    
-    <p>
-        <a href="#" onclick="return togglenavmap();">nav map</a>
-    </p>
 
-    <div id="nav-map-container" class="off">
-        <div id="nav-map"></div>
-        <canvas id="nav-map-bullseye" width="700" height="400">
-    </div>
-    
     <ol>
+        <li>
+            <form method="get" action="yqlgeo.html">
+                <input type="search" name="q" id="location-q" size="40" value="">
+                <input type="submit" value="Search">
+                <a href="#" onclick="return togglenavmap(this);">Use Map</a>
+            </form>
+        </li>
+        <li>
+            <div id="nav-map-container" class="off">
+                <div id="nav-map"></div>
+                <canvas id="nav-map-bullseye" width="700" height="400">
+            </div>
+        </li>
         <li id="block">
             <h1 class="name">…</h1>
             <h3>
