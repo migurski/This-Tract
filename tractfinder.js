@@ -360,8 +360,8 @@ function tractfinder()
     {
         //console.log(o);
         
-        latitude = o.place.centroid.latitude;
-        longitude = o.place.centroid.longitude;
+        latitude = parseFloat(o.place.centroid.latitude);
+        longitude = parseFloat(o.place.centroid.longitude);
         
         window['onblock'] = onblock;
 
