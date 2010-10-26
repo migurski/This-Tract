@@ -21,7 +21,7 @@
             <form method="get" action="index.html">
                 <input type="search" name="q" id="location-q" size="40" value="">
                 <input type="submit" value="Search">
-                <a href="#" onclick="return togglenavmap(this);">Use Map</a>
+                <a id="navmap-toggle" class="hidden" href="#" onclick="return togglenavmap(this);">Use Map</a>
             </form>
         </li>
         <li>
@@ -34,7 +34,7 @@
             </div>
         </li>
         <li id="block">
-            <h1 class="name">…</h1>
+            <h1 class="name">Trying to find you…</h1>
             <h3>
                 <a href="#tract-text" class="tract-name">…</a>,
                 <a href="#county-text" class="county-name">…</a>,

@@ -131,6 +131,11 @@ sup
     -moz-border-radius: 0 6px 6px 0;
 }
 
+#navmap-toggle.hidden
+{
+    display: none;
+}
+
 .loading
 {
     height: 100px;
