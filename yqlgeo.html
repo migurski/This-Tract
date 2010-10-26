@@ -85,29 +85,63 @@
         {
             margin: 0 auto;
             border: 1px solid rgb(49, 163, 84);
+            position: relative;
+            width: 700px;
+            height: 250px;
         }
 
         #nav-map-container.off
         {
             display: none;
         }
-
-        #nav-map-container,
-        #nav-map-bullseye
-        {
-            position: relative;
-            width: 700px;
-            height: 250px;
-        }
-
-        #nav-map-bullseye
+        
+        #nav-map-container .zoom
         {
             position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;
+            top: 8px;
+            left: 8px;
+            width: 48px;
+            height: 16px;
+            -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, .3);
+            -moz-box-shadow: 0 0 8px rgba(0, 0, 0, .3);
+            box-shadow: 0 0 8px rgba(0, 0, 0, .3);
+            border-radius: 6px;
+            -moz-border-radius: 6px;
         }
         
+        #nav-map-container .zoom a
+        {
+            position: absolute;
+            border: 1px solid rgb(49, 163, 84);
+            background-color: white;
+            width: 24px;
+            height: 16px;
+            color: rgb(0, 120, 45);
+            
+            text-decoration: none;
+            vertical-align: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            line-height: 16px;
+        }
+        
+        #nav-map-container .zoom a.out
+        {
+            top: -1px;
+            left: -1px;
+            border-radius: 6px 0 0 6px;
+            -moz-border-radius: 6px 0 0 6px;
+        }
+
+        #nav-map-container .zoom a.in
+        {
+            top: -1px;
+            left: 23px;
+            border-radius: 0 6px 6px 0;
+            -moz-border-radius: 0 6px 6px 0;
+        }
+
         .loading
         {
         	height: 100px;
@@ -422,7 +456,7 @@
             var map = new mm.Map(element, provider, new mm.Point(width, height));
 
             map.setSize(width, height);
-            map.setCenterZoom(new mm.Location(latlon[0], latlon[1]), 15);
+            map.setCenterZoom(new mm.Location(latlon[0], latlon[1]), 14);
             map.draw();
             
             var canvas = document.createElement('canvas');
@@ -456,10 +490,30 @@
 
         function tractfinder()
         {
-            var firsttime = true,
+            var navmap = undefined,
                 latitude = undefined,
                 longitude = undefined;
         
+            function navmapzoomin()
+            {
+                if(navmap)
+                {
+                    navmap.zoomIn();
+                }
+                
+                return false;
+            }
+        
+            function navmapzoomout()
+            {
+                if(navmap)
+                {
+                    navmap.zoomOut();
+                }
+                
+                return false;
+            }
+            
             function onlocation(o)
             {
                 console.log(o);
@@ -485,14 +539,13 @@
                     success: onblock
                 });
                 
-                if(firsttime)
+                if(navmap == undefined)
                 {
-                    firsttime = false;
-                    var map = donavmap('nav-map', [latitude, longitude]);
+                    navmap = donavmap('nav-map', [latitude, longitude]);
 
-                    var onmoved = getonmoved(map);
-                    map.addCallback('zoomed', onmoved);
-                    map.addCallback('panned', onmoved);
+                    var onmoved = getonmoved(navmap);
+                    navmap.addCallback('zoomed', onmoved);
+                    navmap.addCallback('panned', onmoved);
                 }
             }
         
@@ -627,6 +680,20 @@
             
             function start()
             {
+                if(location.hash.match(/^#-?\d+(\.\d+)?,-?\d+(\.\d+)?$/))
+                {
+                    var q = onLatLonQuery(location.hash.substr(1));
+                    console.log(['hash', q]);
+                    
+                    console.log(location.pathname + '?q=' + escape(q));
+                    
+                    location.href = location.pathname + '?q=' + escape(q);
+                    return;
+                    
+                    document.getElementById('location-q').value = q;
+                    return;
+                }
+            
                 if(location.search.match(/^\?/))
                 {
                     var parts = location.search.substr(1).split('&');
@@ -669,6 +736,7 @@
                 {
                     //console.log(['center', map.getCenter()]);
                     var loc = map.getCenter();
+                    location.hash = '#' + loc.lat.toFixed(6) + ',' + loc.lon.toFixed(6);
                     loc = {'place': {'centroid': {'latitude': loc.lat, 'longitude': loc.lon}}};
                     onlocation(loc);
                 }
@@ -682,7 +750,7 @@
                 return moved;
             }
             
-            return {start: start};
+            return {start: start, navmapzoomin: navmapzoomin, navmapzoomout: navmapzoomout};
         }
         
         var tf = tractfinder();
@@ -703,7 +771,10 @@
         <li>
             <div id="nav-map-container" class="off">
                 <div id="nav-map"></div>
-                <canvas id="nav-map-bullseye" width="700" height="400">
+                <div class="zoom">
+                    <a class="out" href="#" onclick="return tf.navmapzoomout();">-</a>
+                    <a class="in" href="#" onclick="return tf.navmapzoomin();">+</a>
+                </div>
             </div>
         </li>
         <li id="block">
