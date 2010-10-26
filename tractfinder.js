@@ -230,6 +230,8 @@ function domap(id, geometry, latlon)
     
     var canvas = document.createElement('canvas');
     canvas.style.position = 'absolute';
+    canvas.style.left = 0;
+    canvas.style.top = 0;
     canvas.width = width;
     canvas.height = height;
     map.parent.appendChild(canvas);
@@ -299,6 +301,8 @@ function donavmap(id, latlon)
     
     var canvas = document.createElement('canvas');
     canvas.style.position = 'absolute';
+    canvas.style.left = 0;
+    canvas.style.top = 0;
     canvas.width = width;
     canvas.height = height;
     map.parent.appendChild(canvas);
@@ -354,7 +358,7 @@ function tractfinder()
     
     function onlocation(o)
     {
-        console.log(o);
+        //console.log(o);
         
         latitude = o.place.centroid.latitude;
         longitude = o.place.centroid.longitude;
@@ -384,16 +388,18 @@ function tractfinder()
             var onmoved = getonmoved(navmap);
             navmap.addCallback('zoomed', onmoved);
             navmap.addCallback('panned', onmoved);
+            
+            $('#navmap-toggle').removeClass('hidden');
         }
     }
 
     function onblock(o)
     {
-        console.log(['block', o]);
+        //console.log(['block', o]);
         
         if(!o.Block.FIPS.match(/^(\d{2})(\d{3})(\d{6})(\d{4})/))
         {
-            console.log([o.Block.FIPS, '?!']);
+            //console.log([o.Block.FIPS, '?!']);
             return;
         }
         
@@ -403,9 +409,9 @@ function tractfinder()
         var county = o.Block.FIPS.replace(/^(\d{2})(\d{3}).+$/, 'http://this-tract.s3.amazonaws.com/counties/$1/$2.json');
         var state = o.Block.FIPS.replace(/^(\d{2}).+$/, 'http://this-tract.s3.amazonaws.com/states/$1.json');
         
-        console.log(tract);
-        console.log(county);
-        console.log(county);
+        //console.log(tract);
+        //console.log(county);
+        //console.log(county);
 
         $.ajax({
             dataType: 'jsonp',
@@ -431,7 +437,7 @@ function tractfinder()
 
     function ontract(o)
     {
-        console.log(['tract', o]);
+        //console.log(['tract', o]);
         
         $('#tract .name').text(o.Name);
         $('#block .tract-name').text(o.Name);
@@ -446,7 +452,7 @@ function tractfinder()
 
     function oncounty(o)
     {
-        console.log(['county', o]);
+        //console.log(['county', o]);
         
         $('#county').removeClass('loading');
 
@@ -460,7 +466,7 @@ function tractfinder()
 
     function onstate(o)
     {
-        console.log(['state', o]);
+        //console.log(['state', o]);
         
         $('#state').removeClass('loading');
 
@@ -486,7 +492,7 @@ function tractfinder()
     
     function onPlaceSearch(o)
     {
-        console.log(o);
+        //console.log(o);
         
         if(o.results.length)
         {
@@ -521,14 +527,8 @@ function tractfinder()
         if(location.hash.match(/^#-?\d+(\.\d+)?,-?\d+(\.\d+)?$/))
         {
             var q = onLatLonQuery(location.hash.substr(1));
-            console.log(['hash', q]);
-            
-            console.log(location.pathname + '?q=' + escape(q));
-            
             location.href = location.pathname + '?q=' + escape(q);
-            return;
             
-            document.getElementById('location-q').value = q;
             return;
         }
     
