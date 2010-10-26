@@ -68,6 +68,7 @@ sup
 	width: 100%;
 	color: #666;
 	background-color: #ddd;
+	border-bottom: 1px solid #ccc;
 	margin: -1em -1em 1em -1em;
 	padding: 1em;
 }
@@ -86,7 +87,7 @@ sup
 {
     /* border: 1px solid rgba(49, 163, 84, .2); */
     margin: 0 auto;
-    width: 900px;
+    width: 800px;
     height: 100px;
 }
 

@@ -38,7 +38,7 @@ function dodemographics(id, demographics)
         var chart = new Image();
 
         chart.src = ['http://chart.apis.google.com/chart?cht=p',
-                     '&chs=900x150',
+                     '&chs=700x150',
                      '&chco=9c9ede|7375b5|4a5584|cedb9c|b5cf6b|8ca252|637939',
                      '&chd=t:', counts.join(','),
                      '&chl=', races.join('|')].join('');
@@ -58,7 +58,7 @@ function dodemographics(id, demographics)
         var chart = new Image();
         
         chart.src = ['http://chart.apis.google.com/chart?cht=p',
-                     '&chs=900x100',
+                     '&chs=700x100',
                      '&chco=c2e699|31a354',
                      '&chd=t:', counts.join(','),
                      '&chl=', genders.join('|')].join('');
@@ -99,7 +99,7 @@ function dodemographics(id, demographics)
         var chart = new Image();
         
         chart.src = ['http://chart.apis.google.com/chart?cht=p',
-                     '&chs=900x150',
+                     '&chs=700x150',
                      '&chco=ffffcc|c2e699|78c679|31a354|006837',
                      '&chd=t:', counts.join(','),
                      '&chl=', ages.join('|')].join('');
@@ -140,7 +140,7 @@ function dodemographics(id, demographics)
         var chart = new Image();
         
         chart.src = ['http://chart.apis.google.com/chart?cht=p',
-                     '&chs=900x150',
+                     '&chs=700x150',
                      '&chco=006837|31a354|78c679|c2e699|ffffcc',
                      '&chd=t:', counts.join(','),
                      '&chl=', houses.join('|')].join('');
@@ -186,7 +186,7 @@ function paintbullseye(ctx, x, y)
 
 function domap(id, geometry, latlon)
 {
-    var width = 900, height = 600, mm = com.modestmaps;
+    var width = 800, height = 600, mm = com.modestmaps;
     
     var locations = [], points = [];
     
@@ -386,7 +386,7 @@ function tractfinder()
             navmap = donavmap('nav-map', [latitude, longitude]);
 
             var onmoved = getonmoved(navmap);
-            navmap.addCallback('zoomed', onmoved);
+            //navmap.addCallback('zoomed', onmoved);
             navmap.addCallback('panned', onmoved);
             
             $('#navmap-toggle').removeClass('hidden');
