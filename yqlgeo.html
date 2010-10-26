@@ -80,17 +80,23 @@
             height: 100px;
         }
         
-        #nav-map-container,
-        #nav-map-bullseye
+        #nav-map-container
         {
-            position: relative;
-            width: 900px;
-            height: 400px;
+            margin-left: 100px;
+            border: 1px solid rgb(49, 163, 84);
         }
 
         #nav-map-container.off
         {
             display: none;
+        }
+
+        #nav-map-container,
+        #nav-map-bullseye
+        {
+            position: relative;
+            width: 700px;
+            height: 250px;
         }
 
         #nav-map-bullseye
@@ -396,7 +402,7 @@
 
         function donavmap(id, latlon)
         {
-            var width = 900, height = 400, mm = com.modestmaps;
+            var width = 700, height = 250, mm = com.modestmaps;
             
             $('#' + id).empty();
             
@@ -674,7 +680,7 @@
     </script>
 </head>
 <body onload="tf.start();">
-
+    
     <form method="get" action="yqlgeo.html">
         <input type="search" name="q" id="location-q" size="40" value="">
         <input type="submit" value="Search">
@@ -683,10 +689,10 @@
     <p>
         <a href="#" onclick="return togglenavmap();">nav map</a>
     </p>
-    
+
     <div id="nav-map-container" class="off">
         <div id="nav-map"></div>
-        <canvas id="nav-map-bullseye" width="900" height="400">
+        <canvas id="nav-map-bullseye" width="700" height="400">
     </div>
     
     <ol>
