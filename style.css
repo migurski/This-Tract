@@ -3,6 +3,7 @@ body
     font-family: Helvetica, Arial, sans-serif;
     font-size: 14px;
     line-height: 1.4em;
+    margin: 1em;
 }
 
 ol li
@@ -61,6 +62,20 @@ sup
 
 .gender-chart { height: 100px; }
 .age-chart, .race-chart, .housing-chart { height: 150px; }
+
+#about
+{
+	width: 100%;
+	color: #666;
+	background-color: #ddd;
+	margin: -1em -1em 1em -1em;
+	padding: 1em;
+}
+
+#about small
+{
+    font-size: 0.8em;
+}
 
 #location-q
 {
