@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Innit</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <script type="text/javascript" src="http://isithackday.com/hacks/geo/yql-geo-library/yqlgeo.js"></script>
+    <script type="text/javascript" src="http://code.modestmaps.com/0.13.2/modestmaps.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.3.min.js"></script>
+    <script type="text/javascript" src="tractfinder.js"></script>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <script type="text/javascript">
+    <!--
+        var tf = tractfinder();
+    //-->
+    </script>
+</head>
+<body onload="tf.start();">
+
+    <ol>
+        <li>
+            <form method="get" action="index.html">
+                <input type="search" name="q" id="location-q" size="40" value="">
+                <input type="submit" value="Search">
+                <a href="#" onclick="return togglenavmap(this);">Use Map</a>
+            </form>
+        </li>
+        <li>
+            <div id="nav-map-container" class="off">
+                <div id="nav-map"></div>
+                <div class="zoom">
+                    <a class="out" href="#" onclick="return tf.navmapzoomout();">-</a>
+                    <a class="in" href="#" onclick="return tf.navmapzoomin();">+</a>
+                </div>
+            </div>
+        </li>
+        <li id="block">
+            <h1 class="name">…</h1>
+            <h3>
+                <a href="#tract-text" class="tract-name">…</a>,
+                <a href="#county-text" class="county-name">…</a>,
+                <a href="#state-text" class="state-name">…</a>
+            </h3>
+        </li>
+        <li id="tract" class="loading">
+            <div id="tract-map"></div>
+            <h2><a name="tract-text" class="name">…</a></h2>
+            <dl>
+                <dt>Population</dt><dd class="population-number">…</dd>
+                <dt>Housing units</dt><dd class="housing-number">…</dd>
+                <dt>Land Area</dt><dd class="landarea-number">…</dd>
+                <dt>Water Area</dt><dd class="waterarea-number">…</dd>
+            </dl>
+            <p class="gender-chart"></p>
+            <p class="age-chart"></p>
+            <p class="race-chart"></p>
+            <p class="housing-chart"></p>
+        </li>
+        <li id="county" class="loading">
+            <h2><a name="county-text" class="name">…</a></h2>
+            <dl>
+                <dt>Population</dt><dd class="population-number">…</dd>
+                <dt>Housing units</dt><dd class="housing-number">…</dd>
+                <dt>Land Area</dt><dd class="landarea-number">…</dd>
+                <dt>Water Area</dt><dd class="waterarea-number">…</dd>
+            </dl>
+            <p class="gender-chart"></p>
+            <p class="age-chart"></p>
+            <p class="race-chart"></p>
+            <p class="housing-chart"></p>
+        </li>
+        <li id="state" class="loading">
+            <h2><a name="state-text" class="name">…</a></h2>
+            <dl>
+                <dt>Population</dt><dd class="population-number">…</dd>
+                <dt>Housing units</dt><dd class="housing-number">…</dd>
+                <dt>Land Area</dt><dd class="landarea-number">…</dd>
+                <dt>Water Area</dt><dd class="waterarea-number">…</dd>
+            </dl>
+            <p class="gender-chart"></p>
+            <p class="age-chart"></p>
+            <p class="race-chart"></p>
+            <p class="housing-chart"></p>
+        </li>
+    </ol>
+
+</body>
+</html>
