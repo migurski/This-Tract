@@ -51,6 +51,12 @@
             margin-bottom: 1em;
         }
         
+        dl *
+        {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
         h3
         {
             margin-top: -1em;
@@ -278,6 +284,14 @@
         
         function paintbullseye(ctx, x, y)
         {
+            ctx.fillStyle = 'rgba(0, 0, 0, .1)';
+
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, Math.PI*2, false);
+            ctx.closePath();
+
+            ctx.fill();
+
             ctx.fillStyle = '#fff';
             ctx.strokeStyle = 'rgba(49, 163, 84, 1)';
             ctx.lineWidth = 1;
