@@ -186,7 +186,7 @@ function paintbullseye(ctx, x, y)
 
 function domap(id, geometry, latlon)
 {
-    var width = 700, height = 600, mm = com.modestmaps;
+    var width = 900, height = 600, mm = com.modestmaps;
     
     var locations = [], points = [];
     
@@ -296,7 +296,7 @@ function donavmap(id, latlon)
     var map = new mm.Map(element, provider, new mm.Point(width, height));
 
     map.setSize(width, height);
-    map.setCenterZoom(new mm.Location(latlon[0], latlon[1]), 14);
+    map.setCenterZoom(new mm.Location(latlon[0], latlon[1]), 12);
     map.draw();
     
     var canvas = document.createElement('canvas');
