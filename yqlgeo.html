@@ -19,6 +19,7 @@
         ol li
         {
             list-style-type: none;
+            width: 900px;
         }
         
         ol, li
@@ -98,6 +99,19 @@
             top: 0;
             left: 0;
             pointer-events: none;
+        }
+        
+        .loading
+        {
+        	height: 100px;
+        	background-image: url(spinner.gif);
+        	background-repeat: no-repeat;
+        	background-position: center center;
+        }
+        
+        .loading *
+        {
+            display: none;
         }
 
     -->
@@ -425,8 +439,9 @@
 
         function tractfinder()
         {
-            var firsttime = true;
-            var latitude = undefined, longitude = undefined;
+            var firsttime = true,
+                latitude = undefined,
+                longitude = undefined;
         
             function onlocation(o)
             {
@@ -443,11 +458,25 @@
                            '&longitude=', longitude.toFixed(7),
                            '&callback=?'];
     
+                $('#tract').addClass('loading');
+                $('#county').addClass('loading');
+                $('#state').addClass('loading');
+
                 $.ajax({
                     dataType: 'jsonp',
                     url: url.join(''),
                     success: onblock
                 });
+                
+                if(firsttime)
+                {
+                    firsttime = false;
+                    var map = donavmap('nav-map', [latitude, longitude]);
+
+                    var onmoved = getonmoved(map);
+                    map.addCallback('zoomed', onmoved);
+                    map.addCallback('panned', onmoved);
+                }
             }
         
             function onblock(o)
@@ -501,24 +530,18 @@
                 $('#tract .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
                 $('#tract .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
                 
+                $('#tract').removeClass('loading');
+
                 dodemographics('#tract', o.Demographics);
                 domap('tract-map', o.Geography.geometry, [latitude, longitude]);
-                
-                if(firsttime)
-                {
-                    firsttime = false;
-                    var map = donavmap('nav-map', [latitude, longitude]);
-
-                    var onmoved = getonmoved(map);
-                    map.addCallback('zoomed', onmoved);
-                    map.addCallback('panned', onmoved);
-                }
             }
         
             function oncounty(o)
             {
                 console.log(['county', o]);
                 
+                $('#county').removeClass('loading');
+
                 $('#county .name').text(o.Name);
                 $('#block .county-name').text(o.Name);
                 $('#county .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
@@ -531,6 +554,8 @@
             {
                 console.log(['state', o]);
                 
+                $('#state').removeClass('loading');
+
                 $('#state .name').text(o.Name);
                 $('#block .state-name').text(o.Name);
                 $('#state .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
@@ -673,7 +698,7 @@
                 <a href="#state-text" class="state-name">…</a>
             </h3>
         </li>
-        <li id="tract">
+        <li id="tract" class="loading">
             <div id="tract-map"></div>
             <h2><a name="tract-text" class="name">…</a></h2>
             <dl>
@@ -687,7 +712,7 @@
             <p class="race-chart"></p>
             <p class="housing-chart"></p>
         </li>
-        <li id="county">
+        <li id="county" class="loading">
             <h2><a name="county-text" class="name">…</a></h2>
             <dl>
                 <dt>Population</dt><dd class="population-number">…</dd>
@@ -700,7 +725,7 @@
             <p class="race-chart"></p>
             <p class="housing-chart"></p>
         </li>
-        <li id="state">
+        <li id="state" class="loading">
             <h2><a name="state-text" class="name">…</a></h2>
             <dl>
                 <dt>Population</dt><dd class="population-number">…</dd>
