@@ -4,63 +4,103 @@
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>Protoblah</title>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.3.min.js"></script>
     <script src="protovis-d3.2.js" type="text/javascript"></script>
+    <style type="text/css" title="text/css">
+    <!--
+        li.active { background-color: yellow; }
+    -->
+    </style>
 </head>
 <body>
 
 <script type="text/javascript">
 <!--
 
-    var data1 = [26, 16, 26, 26, 5.6],
-        data2 = [25, 18, 27, 21, 9.5],
-        data3 = [27, 17, 24, 21, 11],
+    var data = [26, 16, 26, 26, 5.6],
         labels = ['Under 18', '18 to 29', '30 to 44', '45 to 64', '65+'],
-        colors1 = ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'],
-        colors2 = ['rgba(255,255,204,.5)', 'rgba(194,230,153,.5)', 'rgba(120,198,121,.5)', 'rgba(49,163,84,.5)', 'rgba(0,104,55,.5)'],
-        sum = pv.sum(data1);
+        colors = ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'],
+        sum = pv.sum(data);
     
     var vis = new pv.Panel()
-        .def('lit', -1)
+        .def('active', -1)
         .width(150)
         .height(150);
     
-    var wedge2 = vis.add(pv.Wedge)
-        .data(data2)
-        .left(75)
-        .bottom(75)
-        .innerRadius(60)
-        .outerRadius(70)
-        .angle(function(d) { return d / sum * 2 * Math.PI })
-        .fillStyle(function(d) { return colors1[this.index] })
-        .strokeStyle('#fff')
-        .lineWidth(1);
+    var external_labels = [];
     
-    var wedge3 = vis.add(pv.Wedge)
-        .data(data3)
-        .left(75)
-        .bottom(75)
-        .innerRadius(70)
-        .outerRadius(75)
-        .angle(function(d) { return d / sum * 2 * Math.PI })
-        .fillStyle(function(d) { return colors1[this.index] })
-        .strokeStyle('#fff')
-        .lineWidth(1);
+    function addExternalLabel(element, index)
+    {
+        if(external_labels[index] != undefined)
+            return external_labels[index];
+    
+        function on()
+        {
+            vis.active(index);
+            vis.root.render();
+            
+            $(element).addClass('active');
+        }
+        
+        function off()
+        {
+            vis.active(-1);
+            vis.root.render();
+            
+            $(element).removeClass('active');
+        }
+        
+        external_labels[index] = {'on': on, 'off': off};
+        
+        element.onmouseover = function(e)
+        {
+            on();
+        }
+
+        element.onmouseout = function(e)
+        {
+            off();
+        }
+        
+        return external_labels[index];
+    }
     
     var wedge = vis.add(pv.Wedge)
-        .data(data1)
+        .data(data)
         .left(75)
         .bottom(75)
-        .innerRadius(20)
-        .outerRadius(60)
+        .innerRadius(35)
+        .outerRadius(75)
         .angle(function(d) { return d / sum * 2 * Math.PI })
-        .fillStyle(function(d) { return colors1[this.index] })
-        .strokeStyle(function(d) { return (vis.lit() == this.index) ? '#000' : '#fff' })
-        .lineWidth(function(d) { return (vis.lit() == this.index) ? 1 : 1 })
-        .event('mouseover', function() { return vis.lit(this.index) });
+        .fillStyle(function(d) { return colors[this.index] })
+        .strokeStyle('white')
+        .lineWidth(1)
+        .event('mouseover', function() { return external_labels[this.index].on(); })
+        .event('mouseout', function() { return external_labels[this.index].off(); });
     
+    wedge.anchor()
+        .add(pv.Label)
+        .visible(function(d) { return this.index == vis.active() })
+        .textStyle(function(d) { return (this.index == 4) ? 'rgba(255,255,255,.8)' : 'rgba(0,0,0,.6)' })
+        .font('16px Helvetica, Arial')
+        .text('●');
+
     vis.render();
     
-    console.log(vis);
+    var ol = document.createElement('ol');
+    
+    for(var i = 0 ; i < data.length; i += 1)
+    {
+        var tx = document.createTextNode(labels[i]);
+        var li = document.createElement('li');
+        
+        addExternalLabel(li, i);
+        
+        li.appendChild(tx);
+        ol.appendChild(li);
+    }
+    
+    document.body.appendChild(ol);
 
 //-->
 </script>
