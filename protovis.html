@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>Protoblah</title>
+    <script src="protovis-d3.2.js" type="text/javascript"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+<!--
+
+    var data1 = [26, 16, 26, 26, 5.6],
+        data2 = [25, 18, 27, 21, 9.5],
+        data3 = [27, 17, 24, 21, 11],
+        labels = ['Under 18', '18 to 29', '30 to 44', '45 to 64', '65+'],
+        colors1 = ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'],
+        colors2 = ['rgba(255,255,204,.5)', 'rgba(194,230,153,.5)', 'rgba(120,198,121,.5)', 'rgba(49,163,84,.5)', 'rgba(0,104,55,.5)'],
+        sum = pv.sum(data1);
+    
+    var vis = new pv.Panel()
+        .def('lit', -1)
+        .width(150)
+        .height(150);
+    
+    var wedge2 = vis.add(pv.Wedge)
+        .data(data2)
+        .left(75)
+        .bottom(75)
+        .innerRadius(60)
+        .outerRadius(70)
+        .angle(function(d) { return d / sum * 2 * Math.PI })
+        .fillStyle(function(d) { return colors1[this.index] })
+        .strokeStyle('#fff')
+        .lineWidth(1);
+    
+    var wedge3 = vis.add(pv.Wedge)
+        .data(data3)
+        .left(75)
+        .bottom(75)
+        .innerRadius(70)
+        .outerRadius(75)
+        .angle(function(d) { return d / sum * 2 * Math.PI })
+        .fillStyle(function(d) { return colors1[this.index] })
+        .strokeStyle('#fff')
+        .lineWidth(1);
+    
+    var wedge = vis.add(pv.Wedge)
+        .data(data1)
+        .left(75)
+        .bottom(75)
+        .innerRadius(20)
+        .outerRadius(60)
+        .angle(function(d) { return d / sum * 2 * Math.PI })
+        .fillStyle(function(d) { return colors1[this.index] })
+        .strokeStyle(function(d) { return (vis.lit() == this.index) ? '#000' : '#fff' })
+        .lineWidth(function(d) { return (vis.lit() == this.index) ? 1 : 1 })
+        .event('mouseover', function() { return vis.lit(this.index) });
+    
+    vis.render();
+    
+    console.log(vis);
+
+//-->
+</script>
+
+</body>
+</html>
