@@ -63,6 +63,41 @@ sup
 .gender-chart { height: 100px; }
 .age-chart, .race-chart, .housing-chart { height: 150px; }
 
+.labeled-pie-chart
+{
+    position: relative;
+    margin: 0 auto;
+    padding: 0 0 0 150px;
+    text-align: left;
+    width: 450px;
+}
+    
+    .labeled-pie-chart ol
+    {
+        top: 0;
+        left: 300px;
+        width: 300px;
+        position: absolute;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .labeled-pie-chart ol li
+    {
+        margin: 0;
+        width: 290px;
+        padding: 0 0 0 10px;
+        text-align: left;
+        font-size: .8em;
+        color: #666;
+    }
+    
+    .labeled-pie-chart ol li.active
+    {
+        color: #333;
+        background-color: #ffc;
+    }
+
 #about
 {
 	width: 100%;

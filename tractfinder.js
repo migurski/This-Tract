@@ -15,6 +15,106 @@ function nicenumber(value)
     return valueText;
 }
 
+function append_labeled_pie_chart(element, data, labels, colors, darks, small)
+{
+    for(var i = data.length - 1; i >= 0; i--)
+    {
+        if(data[i] == 0)
+        {
+            data.splice(i, 1);
+            labels.splice(i, 1);
+            colors.splice(i, 1);
+            darks.splice(i, 1);
+        }
+    }
+
+    var chart = document.createElement('div');
+    element.appendChild(chart);
+
+    var vis = new pv.Panel()
+        .canvas(chart)
+        .def('active', -1)
+        .width(150)
+        .height(small ? 100 : 150);
+    
+    var external_labels = [];
+    
+    function addExternalLabel(element, index)
+    {
+        if(external_labels[index] != undefined)
+            return external_labels[index];
+    
+        function on()
+        {
+            vis.active(index);
+            vis.root.render();
+            
+            $(element).addClass('active');
+        }
+        
+        function off()
+        {
+            vis.active(-1);
+            vis.root.render();
+            
+            $(element).removeClass('active');
+        }
+        
+        external_labels[index] = {'on': on, 'off': off};
+        
+        element.onmouseover = function(e)
+        {
+            on();
+        }
+
+        element.onmouseout = function(e)
+        {
+            off();
+        }
+        
+        return external_labels[index];
+    }
+    
+    var sum = pv.sum(data);
+
+    var wedge = vis.add(pv.Wedge)
+        .data(data)
+        .left(75)
+        .bottom(small ? 50 : 75)
+        .innerRadius(small ? 20 : 35)
+        .outerRadius(small ? 50 : 75)
+        .angle(function(d) { return d / sum * 2 * Math.PI })
+        .fillStyle(function(d) { return colors[this.index] })
+        .strokeStyle('white')
+        .lineWidth(1)
+        .event('mouseover', function() { return external_labels[this.index].on(); })
+        .event('mouseout', function() { return external_labels[this.index].off(); });
+    
+    wedge.anchor()
+        .add(pv.Label)
+        .visible(function(d) { return this.index == vis.active() })
+        .textStyle(function(d) { return darks[this.index] ? 'rgba(255,255,255,.8)' : 'rgba(0,0,0,.6)' })
+        .font('16px Helvetica, Arial')
+        .text('●');
+
+    vis.render();
+    
+    var ol = document.createElement('ol');
+    
+    for(var i = 0 ; i < data.length; i += 1)
+    {
+        var tx = document.createTextNode(labels[i]);
+        var li = document.createElement('li');
+        
+        addExternalLabel(li, i);
+        
+        li.appendChild(tx);
+        ol.appendChild(li);
+    }
+    
+    element.appendChild(ol);
+}
+
 function dodemographics(id, demographics)
 {
     var population = demographics[0][0];
@@ -25,23 +125,19 @@ function dodemographics(id, demographics)
     
     function raceChart()
     {
-        var counts = [], races = [];
+        var counts = [], labels = [];
         
         for(var i = 2; i <= 8; i += 1)
         {
-            var count = nicenumber(100 * demographics[i][0] / population);
-
+            var count = demographics[i][0];
             counts.push(count);
-            races.push(escape(count + '% ' + demographics[i][1]));
+            labels.push(nicenumber(100 * count / population) + '% ' + demographics[i][1]);
         }
-        
-        var chart = new Image();
 
-        chart.src = ['http://chart.apis.google.com/chart?cht=p',
-                     '&chs=700x150',
-                     '&chco=9c9ede|7375b5|4a5584|cedb9c|b5cf6b|8ca252|637939',
-                     '&chd=t:', counts.join(','),
-                     '&chl=', races.join('|')].join('');
+        var chart = document.createElement('div');
+        chart.className = 'labeled-pie-chart';
+        
+        append_labeled_pie_chart(chart, counts, labels, ['#9c9ede', '#7375b5', '#4a5584', '#cedb9c', '#b5cf6b', '#8ca252', '#637939'], [0, 1, 1, 0, 0, 0, 1], false);
         
         return chart;
     }
@@ -49,26 +145,23 @@ function dodemographics(id, demographics)
     function genderChart()
     {
         var counts = [
-                      (100 * demographics[9][0] / population).toFixed(1),
-                      (100 * demographics[33][0] / population).toFixed(1)
+                      (100 * demographics[9][0] / population),
+                      (100 * demographics[33][0] / population)
                      ];
         
-        var genders = [counts[0] + '% Male', counts[1] + '% Female'];
+        var labels = [counts[0].toFixed(1) + '% Male', counts[1].toFixed(1) + '% Female'];
+
+        var chart = document.createElement('div');
+        chart.className = 'labeled-pie-chart';
         
-        var chart = new Image();
-        
-        chart.src = ['http://chart.apis.google.com/chart?cht=p',
-                     '&chs=700x100',
-                     '&chco=c2e699|31a354',
-                     '&chd=t:', counts.join(','),
-                     '&chl=', genders.join('|')].join('');
+        append_labeled_pie_chart(chart, counts, labels, ['#c2e699', '#31a354'], [0, 1], true);
         
         return chart;
     }
     
     function ageChart()
     {
-        var counts = [], ages = [];
+        var counts = [], labels = [];
         
         var blocks = [['Under 18', 10, 13, 34, 37],
                       ['Age 18 to 29', 14, 18, 38, 42],
@@ -90,26 +183,21 @@ function dodemographics(id, demographics)
                 count += demographics[j][0];
             }
             
-            count = nicenumber(100 * count / population);
-            
             counts.push(count);
-            ages.push(count + '% ' + age);
+            labels.push(nicenumber(100 * count / population) + '% ' + age);
         }
+
+        var chart = document.createElement('div');
+        chart.className = 'labeled-pie-chart';
         
-        var chart = new Image();
-        
-        chart.src = ['http://chart.apis.google.com/chart?cht=p',
-                     '&chs=700x150',
-                     '&chco=ffffcc|c2e699|78c679|31a354|006837',
-                     '&chd=t:', counts.join(','),
-                     '&chl=', ages.join('|')].join('');
+        append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
         
         return chart;
     }
     
     function housingChart()
     {
-        var counts = [], houses = [];
+        var counts = [], labels = [];
         
         var blocks = [['6 and more person households', 62, 63, 70, 71],
                       ['4 and 5 person households', 60, 61, 68, 69],
@@ -131,11 +219,16 @@ function dodemographics(id, demographics)
                 count += demographics[j][0];
             }
             
-            count = nicenumber(100 * count / housing);
-            
             counts.push(count);
-            houses.push(count + '% ' + house);
+            labels.push(nicenumber(100 * count / housing) + '% ' + house);
         }
+
+        var chart = document.createElement('div');
+        chart.className = 'labeled-pie-chart';
+        
+        append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
+        
+        return chart;
         
         var chart = new Image();
         
