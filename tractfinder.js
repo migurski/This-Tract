@@ -15,6 +15,16 @@ function nicenumber(value)
     return valueText;
 }
 
+function niceinteger(value)
+{
+    if(value < 10)
+    {
+        return value.toFixed(0);
+    }
+    
+    return nicenumber(value);
+}
+
 function append_labeled_pie_chart(element, data, labels, colors, darks, small)
 {
     for(var i = data.length - 1; i >= 0; i--)
@@ -127,8 +137,8 @@ function dodemographics(id, demographics)
     var population = demographics[0][0];
     var housing = demographics[1][0];
     
-    $([id, '.population-number'].join(' ')).text(nicenumber(population));
-    $([id, '.housing-number'].join(' ')).text(nicenumber(housing));
+    $([id, '.population-number'].join(' ')).text(niceinteger(population));
+    $([id, '.housing-number'].join(' ')).text(niceinteger(housing));
     
     function raceChart()
     {
