@@ -241,10 +241,10 @@ function dodemographics(id, demographics)
         return chart;
     }
 
-    $([id, '.race-chart'].join(' ')).empty().append(raceChart());
-    $([id, '.gender-chart'].join(' ')).empty().append(genderChart());
-    $([id, '.age-chart'].join(' ')).empty().append(ageChart());
-    $([id, '.housing-chart'].join(' ')).empty().append(housingChart());
+    $([id, '.race.chart'].join(' ')).empty().append(raceChart());
+    $([id, '.gender.chart'].join(' ')).empty().append(genderChart());
+    $([id, '.age.chart'].join(' ')).empty().append(ageChart());
+    $([id, '.housing.chart'].join(' ')).empty().append(housingChart());
 }
 
 function paintbullseye(ctx, x, y)
