@@ -14,94 +14,105 @@
 </head>
 <body>
 
+<div id="this"></div>
+<div id="that"></div>
+
 <script type="text/javascript">
 <!--
 
+    function addLabeledPie(element, data, labels, colors)
+    {
+        var vis = new pv.Panel()
+            .canvas(element)
+            .def('active', -1)
+            .width(150)
+            .height(150);
+        
+        var external_labels = [];
+        
+        function addExternalLabel(element, index)
+        {
+            if(external_labels[index] != undefined)
+                return external_labels[index];
+        
+            function on()
+            {
+                vis.active(index);
+                vis.root.render();
+                
+                $(element).addClass('active');
+            }
+            
+            function off()
+            {
+                vis.active(-1);
+                vis.root.render();
+                
+                $(element).removeClass('active');
+            }
+            
+            external_labels[index] = {'on': on, 'off': off};
+            
+            element.onmouseover = function(e)
+            {
+                on();
+            }
+    
+            element.onmouseout = function(e)
+            {
+                off();
+            }
+            
+            return external_labels[index];
+        }
+        
+        var sum = pv.sum(data);
+    
+        var wedge = vis.add(pv.Wedge)
+            .data(data)
+            .left(75)
+            .bottom(75)
+            .innerRadius(35)
+            .outerRadius(75)
+            .angle(function(d) { return d / sum * 2 * Math.PI })
+            .fillStyle(function(d) { return colors[this.index] })
+            .strokeStyle('white')
+            .lineWidth(1)
+            .event('mouseover', function() { return external_labels[this.index].on(); })
+            .event('mouseout', function() { return external_labels[this.index].off(); });
+        
+        wedge.anchor()
+            .add(pv.Label)
+            .visible(function(d) { return this.index == vis.active() })
+            .textStyle(function(d) { return (this.index == 4) ? 'rgba(255,255,255,.8)' : 'rgba(0,0,0,.6)' })
+            .font('16px Helvetica, Arial')
+            .text('●');
+    
+        vis.render();
+        
+        var ol = document.createElement('ol');
+        
+        for(var i = 0 ; i < data.length; i += 1)
+        {
+            var tx = document.createTextNode(labels[i]);
+            var li = document.createElement('li');
+            
+            addExternalLabel(li, i);
+            
+            li.appendChild(tx);
+            ol.appendChild(li);
+        }
+        
+        element.appendChild(ol);
+    }
+
     var data = [26, 16, 26, 26, 5.6],
         labels = ['Under 18', '18 to 29', '30 to 44', '45 to 64', '65+'],
-        colors = ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'],
-        sum = pv.sum(data);
+        colors = ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'];
     
-    var vis = new pv.Panel()
-        .def('active', -1)
-        .width(150)
-        .height(150);
+    addLabeledPie(document.getElementById('this'), data, labels, colors);
+    addLabeledPie(document.getElementById('that'), data, labels, colors);
     
-    var external_labels = [];
-    
-    function addExternalLabel(element, index)
-    {
-        if(external_labels[index] != undefined)
-            return external_labels[index];
-    
-        function on()
-        {
-            vis.active(index);
-            vis.root.render();
-            
-            $(element).addClass('active');
-        }
-        
-        function off()
-        {
-            vis.active(-1);
-            vis.root.render();
-            
-            $(element).removeClass('active');
-        }
-        
-        external_labels[index] = {'on': on, 'off': off};
-        
-        element.onmouseover = function(e)
-        {
-            on();
-        }
-
-        element.onmouseout = function(e)
-        {
-            off();
-        }
-        
-        return external_labels[index];
-    }
-    
-    var wedge = vis.add(pv.Wedge)
-        .data(data)
-        .left(75)
-        .bottom(75)
-        .innerRadius(35)
-        .outerRadius(75)
-        .angle(function(d) { return d / sum * 2 * Math.PI })
-        .fillStyle(function(d) { return colors[this.index] })
-        .strokeStyle('white')
-        .lineWidth(1)
-        .event('mouseover', function() { return external_labels[this.index].on(); })
-        .event('mouseout', function() { return external_labels[this.index].off(); });
-    
-    wedge.anchor()
-        .add(pv.Label)
-        .visible(function(d) { return this.index == vis.active() })
-        .textStyle(function(d) { return (this.index == 4) ? 'rgba(255,255,255,.8)' : 'rgba(0,0,0,.6)' })
-        .font('16px Helvetica, Arial')
-        .text('●');
-
-    vis.render();
-    
-    var ol = document.createElement('ol');
-    
-    for(var i = 0 ; i < data.length; i += 1)
-    {
-        var tx = document.createTextNode(labels[i]);
-        var li = document.createElement('li');
-        
-        addExternalLabel(li, i);
-        
-        li.appendChild(tx);
-        ol.appendChild(li);
-    }
-    
-    document.body.appendChild(ol);
-
 //-->
 </script>
 
