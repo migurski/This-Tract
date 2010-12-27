@@ -103,11 +103,18 @@ function append_labeled_pie_chart(element, data, labels, colors, darks, small)
     
     for(var i = 0 ; i < data.length; i += 1)
     {
+        var bl = document.createTextNode('█');
+        var co = document.createElement('span');
         var tx = document.createTextNode(labels[i]);
         var li = document.createElement('li');
         
         addExternalLabel(li, i);
         
+        co.style.color = colors[i];
+        co.style.paddingRight = '0.5em';
+        
+        co.appendChild(bl);
+        li.appendChild(co);
         li.appendChild(tx);
         ol.appendChild(li);
     }
