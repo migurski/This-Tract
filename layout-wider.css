@@ -1,0 +1,41 @@
+.geographic-area
+{
+    position: relative;
+    display: block;
+    float: left;
+    text-align: left;
+    width: 24%;
+}
+
+.gender.chart { height: 200px; }
+.race.chart { height: 350px; }
+.age.chart, .housing.chart { height: 300px; }
+
+.geographic-area>*
+{
+    padding-left: 20px;
+}
+    
+.geographic-area h2
+{
+    height: 2em;
+}
+    
+.labeled-pie-chart
+{
+    width: 100%;
+    padding-left: 0;
+}
+    
+    .labeled-pie-chart ol
+    {
+        display: block;
+        position: relative;
+        width: 100%;
+        left: 0;
+    }
+    
+    .labeled-pie-chart ol li
+    {
+        width: 95%;
+    }
