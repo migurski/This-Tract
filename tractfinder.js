@@ -518,11 +518,8 @@ function tractfinder()
         var tract = o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6}).+$/, 'http://this-tract.s3.amazonaws.com/tracts/$1/$2/$3.json');
         var county = o.Block.FIPS.replace(/^(\d{2})(\d{3}).+$/, 'http://this-tract.s3.amazonaws.com/counties/$1/$2.json');
         var state = o.Block.FIPS.replace(/^(\d{2}).+$/, 'http://this-tract.s3.amazonaws.com/states/$1.json');
+        var country = 'http://this-tract.s3.amazonaws.com/country.json';
         
-        //console.log(tract);
-        //console.log(county);
-        //console.log(county);
-
         $.ajax({
             dataType: 'jsonp',
             url: 'slimjim.php?url=' + escape(tract) + '&callback=?',
@@ -539,6 +536,12 @@ function tractfinder()
             dataType: 'jsonp',
             url: 'slimjim.php?url=' + escape(state) + '&callback=?',
             success: onstate
+        });
+        
+        $.ajax({
+            dataType: 'jsonp',
+            url: 'slimjim.php?url=' + escape(country) + '&callback=?',
+            success: oncountry
         });
         
         window['oncounty'] = oncounty;
@@ -586,6 +589,19 @@ function tractfinder()
         $('#state .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         
         dodemographics('#state', o.Demographics);
+    }
+    
+    function oncountry(o)
+    {
+        //console.log(['country', o]);
+        
+        $('#country').removeClass('loading');
+
+        $('#country .name').text(o.Name);
+        $('#country .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+        $('#country .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
+        
+        dodemographics('#country', o.Demographics);
     }
 
     function onLatLonQuery(q)
