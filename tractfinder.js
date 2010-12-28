@@ -515,9 +515,9 @@ function tractfinder()
         
         $('#block .name').text('Block ' + o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6})(\d{4})$/, '$1.$2.$3.$4'));
 
-        var tract = o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6}).+$/, 'http://this-tract.s3.amazonaws.com/tracts/$1/$2/$3.json');
-        var county = o.Block.FIPS.replace(/^(\d{2})(\d{3}).+$/, 'http://this-tract.s3.amazonaws.com/counties/$1/$2.json');
-        var state = o.Block.FIPS.replace(/^(\d{2}).+$/, 'http://this-tract.s3.amazonaws.com/states/$1.json');
+        var tract = o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6}).+$/, 'http://this-tract.s3.amazonaws.com/2000/tracts/$1/$2/$3.json');
+        var county = o.Block.FIPS.replace(/^(\d{2})(\d{3}).+$/, 'http://this-tract.s3.amazonaws.com/2000/counties/$1/$2.json');
+        var state = o.Block.FIPS.replace(/^(\d{2}).+$/, 'http://this-tract.s3.amazonaws.com/2000/states/$1.json');
         var country = 'http://this-tract.s3.amazonaws.com/country.json';
         
         $.ajax({
