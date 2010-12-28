@@ -4,6 +4,8 @@ from ConfigParser import ConfigParser
 from json import JSONEncoder, load
 from re import compile
 
+from shapely import wkt
+from psycopg2 import connect
 from boto.s3.connection import S3Connection
 from boto.s3 import Bucket
 
@@ -111,14 +113,25 @@ values = [
 
 if __name__ == '__main__':
 
+    config_file, sf1_file, sf3_file = argv[1:]
+    
     cfg = ConfigParser()
-    cfg.read(argv[1])
+    cfg.read(config_file)
     
     access = cfg.get('aws', 'access')
     secret = cfg.get('aws', 'secret')
     bucket = cfg.get('aws', 'bucket')
 
     s3 = Bucket(S3Connection(access, secret), bucket)
+    
+    hostname = cfg.get('pgsql', 'hostname')
+    database = cfg.get('pgsql', 'database')
+    username = cfg.get('pgsql', 'username')
+    password = cfg.get('pgsql', 'password')
+    
+    dsn = ' '.join(['%s=%s' % (k, v) for (k, v) in dict(host=hostname, dbname=database, user=username, password=password).items() if v])
+
+    db = connect(dsn)
     
     if len(argv) >= 3:
         print >> stderr, 'GeoJSON...',
