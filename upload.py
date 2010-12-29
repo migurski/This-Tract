@@ -107,6 +107,9 @@ def get_simple_geom(db, table_name, column_names, key_values):
         gids.append('%d' % gid)
         bboxes.append(wkt.loads(geom_wkt))
     
+    if not gids:
+        return None
+    
     gids = ','.join(gids)
     
     bbox = reduce(lambda a, b: a.union(b), bboxes)
