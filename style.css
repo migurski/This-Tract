@@ -36,6 +36,15 @@ h3
     font-size: 1.4em;
 }
 
+h4
+{
+    font-weight: normal;
+    font-size: 1em;
+    height: 2em;
+    margin: .5em 0 1em 0;
+    color: #999;
+}
+
 dd
 {
     color: #31a354;

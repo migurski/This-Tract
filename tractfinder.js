@@ -25,7 +25,7 @@ function niceinteger(value)
     return nicenumber(value);
 }
 
-function append_labeled_pie_chart(element, data, labels, colors, darks, small)
+function append_labeled_pie_chart(element, data, header, labels, colors, darks, small)
 {
     for(var i = data.length - 1; i >= 0; i--)
     {
@@ -109,6 +109,12 @@ function append_labeled_pie_chart(element, data, labels, colors, darks, small)
 
     vis.render();
     
+    var ti = document.createElement('h4')
+    ti.appendChild(document.createTextNode(header[0]));
+    ti.appendChild(document.createElement('br'));
+    ti.appendChild(document.createTextNode(header[1]));
+    element.appendChild(ti);
+    
     var ol = document.createElement('ol');
     
     for(var i = 0 ; i < data.length; i += 1)
@@ -132,7 +138,7 @@ function append_labeled_pie_chart(element, data, labels, colors, darks, small)
     element.appendChild(ol);
 }
 
-function dodemographics(id, demographics)
+function dodemographics(id, area_name, demographics)
 {
     var population = demographics[0][0];
     var housing = demographics[1][0];
@@ -154,7 +160,7 @@ function dodemographics(id, demographics)
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, labels, ['#9c9ede', '#7375b5', '#4a5584', '#cedb9c', '#b5cf6b', '#8ca252', '#637939'], [0, 1, 1, 0, 0, 0, 1], false);
+        append_labeled_pie_chart(chart, counts, ['Race', area_name], labels, ['#9c9ede', '#7375b5', '#4a5584', '#cedb9c', '#b5cf6b', '#8ca252', '#637939'], [0, 1, 1, 0, 0, 0, 1], false);
         
         return chart;
     }
@@ -171,7 +177,7 @@ function dodemographics(id, demographics)
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, labels, ['#c2e699', '#31a354'], [0, 1], true);
+        append_labeled_pie_chart(chart, counts, ['Gender', area_name], labels, ['#c2e699', '#31a354'], [0, 1], true);
         
         return chart;
     }
@@ -218,18 +224,18 @@ function dodemographics(id, demographics)
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
+        append_labeled_pie_chart(chart, counts, ['Age', area_name], labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
         
         return chart;
     }
     
     function housingChart()
     {
-        var blocks = [['One person households', 65, 65],
-                      ['Two person households', 58, 58, 66, 66],
-                      ['Three person households', 59, 59, 67, 67],
-                      ['4 and 5 person households', 60, 61, 68, 69],
-                      ['6 and more person households', 62, 63, 70, 71]];
+        var blocks = [['One person', 65, 65],
+                      ['Two person', 58, 58, 66, 66],
+                      ['Three person', 59, 59, 67, 67],
+                      ['4 and 5 person', 60, 61, 68, 69],
+                      ['6 and more person', 62, 63, 70, 71]];
         
         var counts_labels = groupBlocks(blocks, demographics, housing);
         var counts = counts_labels[0], labels = counts_labels[1];
@@ -237,18 +243,19 @@ function dodemographics(id, demographics)
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
+        append_labeled_pie_chart(chart, counts, ['Households', area_name], labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
         
         return chart;
     }
 
     function educationChart()
     {
-        var blocks = [['Age 25+ with no school', 90, 90, 107, 107],
-                      ['Age 25+ attended up to middle school', 91, 93, 109, 110],
-                      ['Age 25+ attended high school', 94, 98, 111, 115],
-                      ['Age 25+ attended college', 99, 102, 116, 119],
-                      ['Age 25+ advanced college', 103, 105, 120, 122]];
+        var blocks = [['No high school', 90, 93, 107, 110],
+                      ['Attended high school', 94, 97, 111, 114],
+                      ['Finished high school', 98, 98, 115, 115],
+                      ['Attended college', 99, 100, 116, 117],
+                      ['College degree', 101, 102, 118, 119],
+                      ['College+', 103, 105, 120, 122]];
         
         var population = demographics[89][0] + demographics[106][0];
         var counts_labels = groupBlocks(blocks, demographics, population);
@@ -257,18 +264,19 @@ function dodemographics(id, demographics)
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
+        append_labeled_pie_chart(chart, counts, ['Education (age 25+ only)', area_name], labels, ['#ffffcc', '#d9f0a3', '#addd8e', '#78c679', '#31a354', '#006837'], [0, 0, 0, 0, 1, 1], false);
         
         return chart;
     }
     
     function incomeChart()
     {
-        var blocks = [['Households earning under $10k', 124, 124],
-                      ['Households earning $10k-$40k', 125, 130],
-                      ['Households earning $40k-$75k', 131, 134],
-                      ['Households earning $75k-$200k', 135, 138],
-                      ['Households earning $200k+', 139, 139]];
+        var blocks = [['Under $10k', 124, 124],
+                      ['$10k-$30k', 125, 128],
+                      ['$30k-$60k', 129, 133],
+                      ['$60k-$100k', 134, 135],
+                      ['$100k-$200k', 136, 138],
+                      ['$200k+', 139, 139]];
         
         var households = demographics[123][0];
         var counts_labels = groupBlocks(blocks, demographics, households);
@@ -277,7 +285,7 @@ function dodemographics(id, demographics)
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
+        append_labeled_pie_chart(chart, counts, ['Income (by household)', area_name], labels, ['#ffffcc', '#d9f0a3', '#addd8e', '#78c679', '#31a354', '#006837'], [0, 0, 0, 0, 1, 1], false);
         
         return chart;
     }
@@ -550,7 +558,7 @@ function tractfinder()
         var tract = o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6}).+$/, 'http://this-tract.s3.amazonaws.com/2000/tracts/$1/$2/$3.json');
         var county = o.Block.FIPS.replace(/^(\d{2})(\d{3}).+$/, 'http://this-tract.s3.amazonaws.com/2000/counties/$1/$2.json');
         var state = o.Block.FIPS.replace(/^(\d{2}).+$/, 'http://this-tract.s3.amazonaws.com/2000/states/$1.json');
-        var country = 'http://this-tract.s3.amazonaws.com/country.json';
+        var country = 'http://this-tract.s3.amazonaws.com/2000/country.json';
         
         $.ajax({
             dataType: 'jsonp',
@@ -591,7 +599,7 @@ function tractfinder()
         
         $('#tract').removeClass('loading');
 
-        dodemographics('#tract', o.Demographics);
+        dodemographics('#tract', o.Name.replace(/ /g, ' '), o.Demographics);
         domap('tract-map', o.Geography.geometry, [latitude, longitude]);
     }
 
@@ -606,7 +614,7 @@ function tractfinder()
         $('#county .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         $('#county .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         
-        dodemographics('#county', o.Demographics);
+        dodemographics('#county', o.Name.replace(/ /g, ' '), o.Demographics);
     }
 
     function onstate(o)
@@ -620,7 +628,7 @@ function tractfinder()
         $('#state .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         $('#state .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         
-        dodemographics('#state', o.Demographics);
+        dodemographics('#state', o.Name.replace(/ /g, ' '), o.Demographics);
     }
     
     function oncountry(o)
@@ -633,7 +641,7 @@ function tractfinder()
         $('#country .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         $('#country .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         
-        dodemographics('#country', o.Demographics);
+        dodemographics('#country', o.Name.replace(/ /g, ' '), o.Demographics);
     }
 
     function onLatLonQuery(q)
