@@ -176,34 +176,45 @@ function dodemographics(id, demographics)
         return chart;
     }
     
-    function ageChart()
+    function groupBlocks(blocks, demographics, total)
     {
         var counts = [], labels = [];
         
-        var blocks = [['Under 18', 10, 13, 34, 37],
-                      ['Age 18 to 29', 14, 18, 38, 42],
-                      ['Age 30 to 44', 19, 21, 43, 45],
-                      ['Age 45 to 64', 22, 26, 46, 50],
-                      ['Age 65 and up', 27, 32, 51, 56]];
-        
         for(var i = 0; i < blocks.length; i += 1)
         {
-            var age = blocks[i][0], count = 0;
+            var label = blocks[i][0], count = 0;
             
             for(var j = blocks[i][1]; j <= blocks[i][2]; j += 1)
             {
                 count += demographics[j][0];
             }
             
-            for(var j = blocks[i][3]; j <= blocks[i][4]; j += 1)
+            if(blocks[i].length >= 5)
             {
-                count += demographics[j][0];
+                for(var j = blocks[i][3]; j <= blocks[i][4]; j += 1)
+                {
+                    count += demographics[j][0];
+                }
             }
             
             counts.push(count);
-            labels.push(nicenumber(100 * count / population) + '% ' + age);
+            labels.push(nicenumber(100 * count / total) + '% ' + label);
         }
-
+        
+        return [counts, labels];
+    }
+    
+    function ageChart()
+    {
+        var blocks = [['Under 18', 10, 13, 34, 37],
+                      ['Age 18 to 29', 14, 18, 38, 42],
+                      ['Age 30 to 44', 19, 21, 43, 45],
+                      ['Age 45 to 64', 22, 26, 46, 50],
+                      ['Age 65 and up', 27, 32, 51, 56]];
+        
+        var counts_labels = groupBlocks(blocks, demographics, population);
+        var counts = counts_labels[0], labels = counts_labels[1];
+        
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
@@ -214,46 +225,59 @@ function dodemographics(id, demographics)
     
     function housingChart()
     {
-        var counts = [], labels = [];
-        
-        var blocks = [['6 and more person households', 62, 63, 70, 71],
-                      ['4 and 5 person households', 60, 61, 68, 69],
-                      ['Three person households', 59, 59, 67, 67],
+        var blocks = [['One person households', 65, 65],
                       ['Two person households', 58, 58, 66, 66],
-                      ['One person households', -1, -2, 65, 65]];
+                      ['Three person households', 59, 59, 67, 67],
+                      ['4 and 5 person households', 60, 61, 68, 69],
+                      ['6 and more person households', 62, 63, 70, 71]];
         
-        for(var i = 0; i < blocks.length; i += 1)
-        {
-            var house = blocks[i][0], count = 0;
-            
-            for(var j = blocks[i][1]; j <= blocks[i][2]; j += 1)
-            {
-                count += demographics[j][0];
-            }
-            
-            for(var j = blocks[i][3]; j <= blocks[i][4]; j += 1)
-            {
-                count += demographics[j][0];
-            }
-            
-            counts.push(count);
-            labels.push(nicenumber(100 * count / housing) + '% ' + house);
-        }
-
+        var counts_labels = groupBlocks(blocks, demographics, housing);
+        var counts = counts_labels[0], labels = counts_labels[1];
+        
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
         append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
         
         return chart;
+    }
+
+    function educationChart()
+    {
+        var blocks = [['Age 25+ with no school', 90, 90, 107, 107],
+                      ['Age 25+ attended up to middle school', 91, 93, 109, 110],
+                      ['Age 25+ attended high school', 94, 98, 111, 115],
+                      ['Age 25+ attended college', 99, 102, 116, 119],
+                      ['Age 25+ advanced college', 103, 105, 120, 122]];
         
-        var chart = new Image();
+        var population = demographics[89][0] + demographics[106][0];
+        var counts_labels = groupBlocks(blocks, demographics, population);
+        var counts = counts_labels[0], labels = counts_labels[1];
         
-        chart.src = ['http://chart.apis.google.com/chart?cht=p',
-                     '&chs=700x150',
-                     '&chco=006837|31a354|78c679|c2e699|ffffcc',
-                     '&chd=t:', counts.join(','),
-                     '&chl=', houses.join('|')].join('');
+        var chart = document.createElement('div');
+        chart.className = 'labeled-pie-chart';
+        
+        append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
+        
+        return chart;
+    }
+    
+    function incomeChart()
+    {
+        var blocks = [['Households earning under $10k', 124, 124],
+                      ['Households earning $10k-$40k', 125, 130],
+                      ['Households earning $40k-$75k', 131, 134],
+                      ['Households earning $75k-$200k', 135, 138],
+                      ['Households earning $200k+', 139, 139]];
+        
+        var households = demographics[123][0];
+        var counts_labels = groupBlocks(blocks, demographics, households);
+        var counts = counts_labels[0], labels = counts_labels[1];
+        
+        var chart = document.createElement('div');
+        chart.className = 'labeled-pie-chart';
+        
+        append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
         
         return chart;
     }
@@ -262,6 +286,8 @@ function dodemographics(id, demographics)
     $([id, '.gender.chart'].join(' ')).empty().append(genderChart());
     $([id, '.age.chart'].join(' ')).empty().append(ageChart());
     $([id, '.housing.chart'].join(' ')).empty().append(housingChart());
+    $([id, '.education.chart'].join(' ')).empty().append(educationChart());
+    $([id, '.income.chart'].join(' ')).empty().append(incomeChart());
 }
 
 function paintbullseye(ctx, x, y)
@@ -296,14 +322,20 @@ function paintbullseye(ctx, x, y)
 
 function domap(id, geometry, latlon)
 {
+    console.log(geometry)
     var width = 800, height = 600, mm = com.modestmaps;
     
     var locations = [], points = [];
     
-    for(var i = 0; i < geometry.coordinates[0].length; i += 1)
+    for(var j = 0; j < geometry.coordinates.length; j += 1)
     {
-        var coord = geometry.coordinates[0][i];
+    
+    for(var i = 0; i < geometry.coordinates[j].length; i += 1)
+    {
+        var coord = geometry.coordinates[j][i];
         locations.push(new mm.Location(coord[1], coord[0]));
+    }
+    
     }
     
     $('#' + id).empty();

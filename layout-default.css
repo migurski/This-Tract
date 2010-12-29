@@ -6,7 +6,7 @@
 }
 
 .gender.chart { height: 100px; }
-.age.chart, .race.chart, .housing.chart { height: 150px; }
+.age.chart, .race.chart, .housing.chart, .education.chart { height: 150px; }
 
 .labeled-pie-chart
 {
