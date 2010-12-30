@@ -264,7 +264,7 @@ function dodemographics(id, area_name, demographics)
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, ['Education (age 25+ only)', area_name], labels, ['#ffffcc', '#d9f0a3', '#addd8e', '#78c679', '#31a354', '#006837'], [0, 0, 0, 0, 1, 1], false);
+        append_labeled_pie_chart(chart, counts, ['Education (age 25+ only)', area_name], labels, ['#f1eef7', '#d0d1e6', '#a6bddb', '#74a9cf', '#2b8cbe', '#045a8d'], [0, 0, 0, 0, 1, 1], false);
         
         return chart;
     }
@@ -328,23 +328,75 @@ function paintbullseye(ctx, x, y)
     ctx.fill();
 }
 
+/**
+ * For a geometry return a list of rings in mm.Location form, normalized so
+ * that exterior rings go clockwise and interior rings go counter-clockwise.
+ * This lets us take advantage of the non-zero winding number rule for fills.
+ */
+function normalize_rings(geometry)
+{
+    var mm = com.modestmaps,
+        geoms = (geometry.type == 'MultiPolygon') ? geometry.coordinates : [geometry.coordinates],
+        rings = [];
+    
+    for(var i = 0; i < geoms.length; i++)
+    {
+        for(var j = 0; j < geoms[i].length; j++)
+        {
+            var spin = 0,
+                r180 = Math.PI,
+                r360 = Math.PI * 2,
+                exterior = (j == 0),
+                src_ring = geoms[i][j],
+                dst_ring = [];
+            
+            for(var k = 0; k < src_ring.length; k++)
+            {
+                var l = (k + 1) % src_ring.length,
+                    m = (k + 2) % src_ring.length;
+                
+                var p1 = src_ring[k],
+                    p2 = src_ring[l],
+                    p3 = src_ring[m];
+                
+                var t1 = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]),
+                    t2 = Math.atan2(p3[1] - p2[1], p3[0] - p2[0]);
+
+                var theta = (t2 - t1);
+                
+                if(theta > r180) {
+                    theta -= r360;
+
+                } else if(theta < -r180) {
+                    theta += r360;
+                }
+                
+                spin += theta;
+                dst_ring.push(new mm.Location(p1[1], p1[0]));
+            }
+            
+            var direction = (Math.abs(spin + r360) < 0.00001) ? 'ccw' : 'cc';
+            
+            // reverse the ring direction so that exteriors go clockwise
+            if(exterior && direction != 'cc' || !exterior && direction != 'ccw')
+            {
+                dst_ring.reverse();
+            }
+            
+            rings.push(dst_ring);
+        }
+    }
+    
+    return rings;
+}
+
 function domap(id, geometry, latlon)
 {
-    console.log(geometry)
-    var width = 800, height = 600, mm = com.modestmaps;
+    var mm = com.modestmaps,
+        width = 800, height = 600,
+        rings = normalize_rings(geometry);
     
-    var locations = [], points = [];
-    
-    for(var j = 0; j < geometry.coordinates.length; j += 1)
-    {
-    
-    for(var i = 0; i < geometry.coordinates[j].length; i += 1)
-    {
-        var coord = geometry.coordinates[j][i];
-        locations.push(new mm.Location(coord[1], coord[0]));
-    }
-    
-    }
+    var locations = rings.reduce(function(a, b) { return a.concat(b) });
     
     $('#' + id).empty();
     
@@ -360,22 +412,31 @@ function domap(id, geometry, latlon)
     
     var ymin = height, ymax = 0;
     
-    for(var i = 0; i < locations.length; i += 1)
+   /*
+    * Correct map height so that the tract fills it vertically at the current zoom.
+    */
+    for(var i = 0; i < rings.length; i++)
     {
-        var point = map.locationPoint(locations[i]);
-        points.push(point);
-        
-        ymin = Math.min(ymin, point.y);
-        ymax = Math.max(ymax, point.y);
+        for(var j = 0; j < rings[i].length; j++)
+        {
+            var point = map.locationPoint(rings[i][j]);
+            ymin = Math.min(ymin, point.y);
+            ymax = Math.max(ymax, point.y);
+        }
     }
     
     height = Math.ceil(21 + ymax - ymin);
-    
     map.setSize(width, height);
     
-    for(var i = 0; i < locations.length; i += 1)
+   /*
+    * Convert every location in rings array to a point.
+    */
+    for(var i = 0; i < rings.length; i++)
     {
-        points[i] = map.locationPoint(locations[i]);
+        for(var j = 0; j < rings[i].length; j++)
+        {
+            rings[i][j] = map.locationPoint(rings[i][j]);
+        }
     }
     
     var canvas = document.createElement('canvas');
@@ -392,35 +453,51 @@ function domap(id, geometry, latlon)
     {
         ctx.clearRect(0, 0, width, height);
         
-        var start = points[points.length - 1];
-        
+       /*
+        * Draw the white mask
+        */
         ctx.fillStyle = 'rgba(255, 255, 255, 1)';
         ctx.beginPath();
         
         ctx.moveTo(0, 0);
-        ctx.lineTo(0, height);
-        ctx.lineTo(width, height);
         ctx.lineTo(width, 0);
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
         ctx.lineTo(0, 0);
-
-        ctx.moveTo(start.x, start.y);
         
-        for(var i = 0; i < points.length; i += 1)
+        for(var i = 0; i < rings.length; i++)
         {
-            ctx.lineTo(points[i].x, points[i].y);
+            var ring = rings[i],
+                start = ring[ring.length - 1];
+            
+            ctx.moveTo(start.x, start.y);
+            
+            for(var j = 0; j < ring.length; j++)
+            {
+                ctx.lineTo(ring[j].x, ring[j].y);
+            }
         }
-        
+
         ctx.closePath();
         ctx.fill();
         
+       /*
+        * Draw the hairline edge
+        */
         ctx.strokeStyle = 'rgba(49, 163, 84, 1)';
-        
-        ctx.moveTo(start.x, start.y);
         ctx.beginPath();
         
-        for(var i = 0; i < points.length; i += 1)
+        for(var i = 0; i < rings.length; i++)
         {
-            ctx.lineTo(points[i].x, points[i].y);
+            var ring = rings[i],
+                start = ring[ring.length - 1];
+            
+            ctx.moveTo(start.x, start.y);
+            
+            for(var j = 0; j < ring.length; j++)
+            {
+                ctx.lineTo(ring[j].x, ring[j].y);
+            }
         }
         
         ctx.closePath();
