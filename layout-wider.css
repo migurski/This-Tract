@@ -7,9 +7,9 @@
     width: 24%;
 }
 
-.gender.chart { height: 200px; }
-.race.chart { height: 350px; }
-.age.chart, .housing.chart { height: 300px; }
+.gender.chart { height: 225px; }
+.race.chart { height: 375px; }
+.age.chart, .housing.chart, .income.chart, .education.chart { height: 325px; }
 
 .geographic-area>*
 {
@@ -27,12 +27,23 @@
     padding-left: 0;
 }
     
+    .labeled-pie-chart h4,
     .labeled-pie-chart ol
     {
         display: block;
         position: relative;
         width: 100%;
+        top: 0;
         left: 0;
+    }
+    
+    .labeled-pie-chart h4
+    {
+        margin: .5em 0 1em 0;
+    }
+    
+    .labeled-pie-chart ol
+    {
     }
     
     .labeled-pie-chart ol li

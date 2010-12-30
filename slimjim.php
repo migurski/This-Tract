@@ -42,9 +42,13 @@
         header('Content-Type: text/plain');
         die("Bad response type from {$url->host}: {$type}.\n");
     }
-
+    
     header('HTTP/1.1 200');
+    header('Cache-Control: public');
     header('Content-Type: text/javascript');
+    header('Last-Modified: '.$req->getResponseHeader('last-modified'));
+    header('Date: '.$req->getResponseHeader('date'));
+    header('Etag: '.$req->getResponseHeader('etag'));
     printf("%s(%s);\n", $callback, $req->getResponseBody());
     exit();
 

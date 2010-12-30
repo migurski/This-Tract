@@ -25,7 +25,7 @@ function niceinteger(value)
     return nicenumber(value);
 }
 
-function append_labeled_pie_chart(element, data, labels, colors, darks, small)
+function append_labeled_pie_chart(element, data, header, labels, colors, darks, small)
 {
     for(var i = data.length - 1; i >= 0; i--)
     {
@@ -109,6 +109,12 @@ function append_labeled_pie_chart(element, data, labels, colors, darks, small)
 
     vis.render();
     
+    var ti = document.createElement('h4')
+    ti.appendChild(document.createTextNode(header[0]));
+    ti.appendChild(document.createElement('br'));
+    ti.appendChild(document.createTextNode(header[1]));
+    element.appendChild(ti);
+    
     var ol = document.createElement('ol');
     
     for(var i = 0 ; i < data.length; i += 1)
@@ -132,7 +138,7 @@ function append_labeled_pie_chart(element, data, labels, colors, darks, small)
     element.appendChild(ol);
 }
 
-function dodemographics(id, demographics)
+function dodemographics(id, area_name, demographics)
 {
     var population = demographics[0][0];
     var housing = demographics[1][0];
@@ -154,7 +160,7 @@ function dodemographics(id, demographics)
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, labels, ['#9c9ede', '#7375b5', '#4a5584', '#cedb9c', '#b5cf6b', '#8ca252', '#637939'], [0, 1, 1, 0, 0, 0, 1], false);
+        append_labeled_pie_chart(chart, counts, ['Race', area_name], labels, ['#9c9ede', '#7375b5', '#4a5584', '#cedb9c', '#b5cf6b', '#8ca252', '#637939'], [0, 1, 1, 0, 0, 0, 1], false);
         
         return chart;
     }
@@ -171,89 +177,115 @@ function dodemographics(id, demographics)
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, labels, ['#c2e699', '#31a354'], [0, 1], true);
+        append_labeled_pie_chart(chart, counts, ['Gender', area_name], labels, ['#c2e699', '#31a354'], [0, 1], true);
         
         return chart;
     }
     
-    function ageChart()
+    function groupBlocks(blocks, demographics, total)
     {
         var counts = [], labels = [];
         
+        for(var i = 0; i < blocks.length; i += 1)
+        {
+            var label = blocks[i][0], count = 0;
+            
+            for(var j = blocks[i][1]; j <= blocks[i][2]; j += 1)
+            {
+                count += demographics[j][0];
+            }
+            
+            if(blocks[i].length >= 5)
+            {
+                for(var j = blocks[i][3]; j <= blocks[i][4]; j += 1)
+                {
+                    count += demographics[j][0];
+                }
+            }
+            
+            counts.push(count);
+            labels.push(nicenumber(100 * count / total) + '% ' + label);
+        }
+        
+        return [counts, labels];
+    }
+    
+    function ageChart()
+    {
         var blocks = [['Under 18', 10, 13, 34, 37],
                       ['Age 18 to 29', 14, 18, 38, 42],
                       ['Age 30 to 44', 19, 21, 43, 45],
                       ['Age 45 to 64', 22, 26, 46, 50],
                       ['Age 65 and up', 27, 32, 51, 56]];
         
-        for(var i = 0; i < blocks.length; i += 1)
-        {
-            var age = blocks[i][0], count = 0;
-            
-            for(var j = blocks[i][1]; j <= blocks[i][2]; j += 1)
-            {
-                count += demographics[j][0];
-            }
-            
-            for(var j = blocks[i][3]; j <= blocks[i][4]; j += 1)
-            {
-                count += demographics[j][0];
-            }
-            
-            counts.push(count);
-            labels.push(nicenumber(100 * count / population) + '% ' + age);
-        }
-
+        var counts_labels = groupBlocks(blocks, demographics, population);
+        var counts = counts_labels[0], labels = counts_labels[1];
+        
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
+        append_labeled_pie_chart(chart, counts, ['Age', area_name], labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
         
         return chart;
     }
     
     function housingChart()
     {
-        var counts = [], labels = [];
+        var blocks = [['One person', 65, 65],
+                      ['Two person', 58, 58, 66, 66],
+                      ['Three person', 59, 59, 67, 67],
+                      ['4 and 5 person', 60, 61, 68, 69],
+                      ['6 and more person', 62, 63, 70, 71]];
         
-        var blocks = [['6 and more person households', 62, 63, 70, 71],
-                      ['4 and 5 person households', 60, 61, 68, 69],
-                      ['Three person households', 59, 59, 67, 67],
-                      ['Two person households', 58, 58, 66, 66],
-                      ['One person households', -1, -2, 65, 65]];
+        var counts_labels = groupBlocks(blocks, demographics, housing);
+        var counts = counts_labels[0], labels = counts_labels[1];
         
-        for(var i = 0; i < blocks.length; i += 1)
-        {
-            var house = blocks[i][0], count = 0;
-            
-            for(var j = blocks[i][1]; j <= blocks[i][2]; j += 1)
-            {
-                count += demographics[j][0];
-            }
-            
-            for(var j = blocks[i][3]; j <= blocks[i][4]; j += 1)
-            {
-                count += demographics[j][0];
-            }
-            
-            counts.push(count);
-            labels.push(nicenumber(100 * count / housing) + '% ' + house);
-        }
-
         var chart = document.createElement('div');
         chart.className = 'labeled-pie-chart';
         
-        append_labeled_pie_chart(chart, counts, labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
+        append_labeled_pie_chart(chart, counts, ['Households', area_name], labels, ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], [0, 0, 0, 1, 1], false);
         
         return chart;
+    }
+
+    function educationChart()
+    {
+        var blocks = [['No high school', 90, 93, 107, 110],
+                      ['Attended high school', 94, 97, 111, 114],
+                      ['Finished high school', 98, 98, 115, 115],
+                      ['Attended college', 99, 100, 116, 117],
+                      ['College degree', 101, 102, 118, 119],
+                      ['College+', 103, 105, 120, 122]];
         
-        var chart = new Image();
+        var population = demographics[89][0] + demographics[106][0];
+        var counts_labels = groupBlocks(blocks, demographics, population);
+        var counts = counts_labels[0], labels = counts_labels[1];
         
-        chart.src = ['http://chart.apis.google.com/chart?cht=p',
-                     '&chs=700x150',
-                     '&chco=006837|31a354|78c679|c2e699|ffffcc',
-                     '&chd=t:', counts.join(','),
-                     '&chl=', houses.join('|')].join('');
+        var chart = document.createElement('div');
+        chart.className = 'labeled-pie-chart';
+        
+        append_labeled_pie_chart(chart, counts, ['Education (age 25+ only)', area_name], labels, ['#f1eef7', '#d0d1e6', '#a6bddb', '#74a9cf', '#2b8cbe', '#045a8d'], [0, 0, 0, 0, 1, 1], false);
+        
+        return chart;
+    }
+    
+    function incomeChart()
+    {
+        var blocks = [['Under $10k', 124, 124],
+                      ['$10k-$30k', 125, 128],
+                      ['$30k-$60k', 129, 133],
+                      ['$60k-$100k', 134, 135],
+                      ['$100k-$200k', 136, 138],
+                      ['$200k+', 139, 139]];
+        
+        var households = demographics[123][0];
+        var counts_labels = groupBlocks(blocks, demographics, households);
+        var counts = counts_labels[0], labels = counts_labels[1];
+        
+        var chart = document.createElement('div');
+        chart.className = 'labeled-pie-chart';
+        
+        append_labeled_pie_chart(chart, counts, ['Income (by household)', area_name], labels, ['#ffffcc', '#d9f0a3', '#addd8e', '#78c679', '#31a354', '#006837'], [0, 0, 0, 0, 1, 1], false);
         
         return chart;
     }
@@ -262,6 +294,8 @@ function dodemographics(id, demographics)
     $([id, '.gender.chart'].join(' ')).empty().append(genderChart());
     $([id, '.age.chart'].join(' ')).empty().append(ageChart());
     $([id, '.housing.chart'].join(' ')).empty().append(housingChart());
+    $([id, '.education.chart'].join(' ')).empty().append(educationChart());
+    $([id, '.income.chart'].join(' ')).empty().append(incomeChart());
 }
 
 function paintbullseye(ctx, x, y)
@@ -294,17 +328,75 @@ function paintbullseye(ctx, x, y)
     ctx.fill();
 }
 
+/**
+ * For a geometry return a list of rings in mm.Location form, normalized so
+ * that exterior rings go clockwise and interior rings go counter-clockwise.
+ * This lets us take advantage of the non-zero winding number rule for fills.
+ */
+function normalize_rings(geometry)
+{
+    var mm = com.modestmaps,
+        geoms = (geometry.type == 'MultiPolygon') ? geometry.coordinates : [geometry.coordinates],
+        rings = [];
+    
+    for(var i = 0; i < geoms.length; i++)
+    {
+        for(var j = 0; j < geoms[i].length; j++)
+        {
+            var spin = 0,
+                r180 = Math.PI,
+                r360 = Math.PI * 2,
+                exterior = (j == 0),
+                src_ring = geoms[i][j],
+                dst_ring = [];
+            
+            for(var k = 0; k < src_ring.length; k++)
+            {
+                var l = (k + 1) % src_ring.length,
+                    m = (k + 2) % src_ring.length;
+                
+                var p1 = src_ring[k],
+                    p2 = src_ring[l],
+                    p3 = src_ring[m];
+                
+                var t1 = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]),
+                    t2 = Math.atan2(p3[1] - p2[1], p3[0] - p2[0]);
+
+                var theta = (t2 - t1);
+                
+                if(theta > r180) {
+                    theta -= r360;
+
+                } else if(theta < -r180) {
+                    theta += r360;
+                }
+                
+                spin += theta;
+                dst_ring.push(new mm.Location(p1[1], p1[0]));
+            }
+            
+            var direction = (Math.abs(spin + r360) < 0.00001) ? 'ccw' : 'cc';
+            
+            // reverse the ring direction so that exteriors go clockwise
+            if(exterior && direction != 'cc' || !exterior && direction != 'ccw')
+            {
+                dst_ring.reverse();
+            }
+            
+            rings.push(dst_ring);
+        }
+    }
+    
+    return rings;
+}
+
 function domap(id, geometry, latlon)
 {
-    var width = 800, height = 600, mm = com.modestmaps;
+    var mm = com.modestmaps,
+        width = 800, height = 600,
+        rings = normalize_rings(geometry);
     
-    var locations = [], points = [];
-    
-    for(var i = 0; i < geometry.coordinates[0].length; i += 1)
-    {
-        var coord = geometry.coordinates[0][i];
-        locations.push(new mm.Location(coord[1], coord[0]));
-    }
+    var locations = rings.reduce(function(a, b) { return a.concat(b) });
     
     $('#' + id).empty();
     
@@ -320,22 +412,31 @@ function domap(id, geometry, latlon)
     
     var ymin = height, ymax = 0;
     
-    for(var i = 0; i < locations.length; i += 1)
+   /*
+    * Correct map height so that the tract fills it vertically at the current zoom.
+    */
+    for(var i = 0; i < rings.length; i++)
     {
-        var point = map.locationPoint(locations[i]);
-        points.push(point);
-        
-        ymin = Math.min(ymin, point.y);
-        ymax = Math.max(ymax, point.y);
+        for(var j = 0; j < rings[i].length; j++)
+        {
+            var point = map.locationPoint(rings[i][j]);
+            ymin = Math.min(ymin, point.y);
+            ymax = Math.max(ymax, point.y);
+        }
     }
     
     height = Math.ceil(21 + ymax - ymin);
-    
     map.setSize(width, height);
     
-    for(var i = 0; i < locations.length; i += 1)
+   /*
+    * Convert every location in rings array to a point.
+    */
+    for(var i = 0; i < rings.length; i++)
     {
-        points[i] = map.locationPoint(locations[i]);
+        for(var j = 0; j < rings[i].length; j++)
+        {
+            rings[i][j] = map.locationPoint(rings[i][j]);
+        }
     }
     
     var canvas = document.createElement('canvas');
@@ -352,35 +453,51 @@ function domap(id, geometry, latlon)
     {
         ctx.clearRect(0, 0, width, height);
         
-        var start = points[points.length - 1];
-        
+       /*
+        * Draw the white mask
+        */
         ctx.fillStyle = 'rgba(255, 255, 255, 1)';
         ctx.beginPath();
         
         ctx.moveTo(0, 0);
-        ctx.lineTo(0, height);
-        ctx.lineTo(width, height);
         ctx.lineTo(width, 0);
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
         ctx.lineTo(0, 0);
-
-        ctx.moveTo(start.x, start.y);
         
-        for(var i = 0; i < points.length; i += 1)
+        for(var i = 0; i < rings.length; i++)
         {
-            ctx.lineTo(points[i].x, points[i].y);
+            var ring = rings[i],
+                start = ring[ring.length - 1];
+            
+            ctx.moveTo(start.x, start.y);
+            
+            for(var j = 0; j < ring.length; j++)
+            {
+                ctx.lineTo(ring[j].x, ring[j].y);
+            }
         }
-        
+
         ctx.closePath();
         ctx.fill();
         
+       /*
+        * Draw the hairline edge
+        */
         ctx.strokeStyle = 'rgba(49, 163, 84, 1)';
-        
-        ctx.moveTo(start.x, start.y);
         ctx.beginPath();
         
-        for(var i = 0; i < points.length; i += 1)
+        for(var i = 0; i < rings.length; i++)
         {
-            ctx.lineTo(points[i].x, points[i].y);
+            var ring = rings[i],
+                start = ring[ring.length - 1];
+            
+            ctx.moveTo(start.x, start.y);
+            
+            for(var j = 0; j < ring.length; j++)
+            {
+                ctx.lineTo(ring[j].x, ring[j].y);
+            }
         }
         
         ctx.closePath();
@@ -515,10 +632,10 @@ function tractfinder()
         
         $('#block .name').text('Block ' + o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6})(\d{4})$/, '$1.$2.$3.$4'));
 
-        var tract = o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6}).+$/, 'http://this-tract.s3.amazonaws.com/tracts/$1/$2/$3.json');
-        var county = o.Block.FIPS.replace(/^(\d{2})(\d{3}).+$/, 'http://this-tract.s3.amazonaws.com/counties/$1/$2.json');
-        var state = o.Block.FIPS.replace(/^(\d{2}).+$/, 'http://this-tract.s3.amazonaws.com/states/$1.json');
-        var country = 'http://this-tract.s3.amazonaws.com/country.json';
+        var tract = o.Block.FIPS.replace(/^(\d{2})(\d{3})(\d{6}).+$/, 'http://this-tract.s3.amazonaws.com/2000/tracts/$1/$2/$3.json');
+        var county = o.Block.FIPS.replace(/^(\d{2})(\d{3}).+$/, 'http://this-tract.s3.amazonaws.com/2000/counties/$1/$2.json');
+        var state = o.Block.FIPS.replace(/^(\d{2}).+$/, 'http://this-tract.s3.amazonaws.com/2000/states/$1.json');
+        var country = 'http://this-tract.s3.amazonaws.com/2000/country.json';
         
         $.ajax({
             dataType: 'jsonp',
@@ -559,7 +676,7 @@ function tractfinder()
         
         $('#tract').removeClass('loading');
 
-        dodemographics('#tract', o.Demographics);
+        dodemographics('#tract', o.Name.replace(/ /g, ' '), o.Demographics);
         domap('tract-map', o.Geography.geometry, [latitude, longitude]);
     }
 
@@ -574,7 +691,7 @@ function tractfinder()
         $('#county .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         $('#county .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         
-        dodemographics('#county', o.Demographics);
+        dodemographics('#county', o.Name.replace(/ /g, ' '), o.Demographics);
     }
 
     function onstate(o)
@@ -588,7 +705,7 @@ function tractfinder()
         $('#state .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         $('#state .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         
-        dodemographics('#state', o.Demographics);
+        dodemographics('#state', o.Name.replace(/ /g, ' '), o.Demographics);
     }
     
     function oncountry(o)
@@ -601,7 +718,7 @@ function tractfinder()
         $('#country .landarea-number').html(nicenumber(o.Geography['Land Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         $('#country .waterarea-number').html(nicenumber(o.Geography['Water Area'] / 1000000) + ' km<sup>2<'+'/sup>');
         
-        dodemographics('#country', o.Demographics);
+        dodemographics('#country', o.Name.replace(/ /g, ' '), o.Demographics);
     }
 
     function onLatLonQuery(q)
