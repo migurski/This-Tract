@@ -9,7 +9,7 @@
 
 .gender.chart { height: 225px; }
 .race.chart { height: 375px; }
-.age.chart, .housing.chart, .education.chart { height: 325px; }
+.age.chart, .housing.chart, .income.chart, .education.chart { height: 325px; }
 
 .geographic-area>*
 {
