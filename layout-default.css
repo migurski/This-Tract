@@ -5,8 +5,8 @@
     margin-top: 1em;
 }
 
-.gender.chart { height: 100px; }
-.age.chart, .race.chart, .housing.chart, .income.chart, .education.chart { height: 150px; }
+.gender.chart { height: 150px; }
+.age.chart, .race.chart, .housing.chart, .income.chart, .education.chart { height: 200px; }
 
 .labeled-pie-chart
 {
@@ -17,14 +17,25 @@
     width: 450px;
 }
     
+    .labeled-pie-chart h4,
     .labeled-pie-chart ol
     {
-        top: 0;
         left: 300px;
         width: 300px;
         position: absolute;
         margin: 0;
         padding: 0;
+    }
+    
+    .labeled-pie-chart h4
+    {
+        top: 0px;
+        padding-left: 1em;
+    }
+    
+    .labeled-pie-chart ol
+    {
+        top: 50px;
     }
     
     .labeled-pie-chart ol li

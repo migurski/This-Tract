@@ -27,12 +27,23 @@
     padding-left: 0;
 }
     
+    .labeled-pie-chart h4,
     .labeled-pie-chart ol
     {
         display: block;
         position: relative;
         width: 100%;
+        top: 0;
         left: 0;
+    }
+    
+    .labeled-pie-chart h4
+    {
+        margin: .5em 0 1em 0;
+    }
+    
+    .labeled-pie-chart ol
+    {
     }
     
     .labeled-pie-chart ol li
