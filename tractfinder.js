@@ -38,6 +38,10 @@ function append_labeled_pie_chart(element, data, header, labels, colors, darks, 
         }
     }
 
+    var hh = document.createElement('h5')
+    hh.appendChild(document.createTextNode(header[1]));
+    element.appendChild(hh);
+
     var chart = document.createElement('div');
     element.appendChild(chart);
 
@@ -660,9 +664,6 @@ function tractfinder()
             url: 'slimjim.php?url=' + escape(country) + '&callback=?',
             success: oncountry
         });
-        
-        window['oncounty'] = oncounty;
-        window['onstate'] = onstate;
     }
 
     function ontract(o)

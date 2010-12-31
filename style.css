@@ -73,24 +73,61 @@ sup
     bottom: .5em;
 }
 
-#about
+header
 {
-	width: 100%;
-	color: #666;
-	background-color: #ddd;
-	border-bottom: 1px solid #ccc;
-	margin: -1em -1em 1em -1em;
-	padding: 1em;
+    padding: 20px 100px;
+    background-color: #efefef;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 40px;
+    display: block;
 }
 
-#about small
+    header h1
+    { 
+        font-size: 32px;
+        margin: 0px;
+        padding: 0px;
+    }
+    
+    header h2
+    { 
+        font-family: Palatino, Georgia, Times, serif;
+        font-style: italic;
+        font-size: 18px;
+        font-weight: normal;
+        margin-left: 10px;
+    }
+    
+    header p
+    {
+        font-family: Palatino, Georgia, Times, serif;
+        font-size: 14px; 
+        margin-left: 10px;
+        color: #666;
+        /*text-shadow: 1px 1px 0px #fff;*/
+    }
+
+footer
 {
-    font-size: 0.8em;
+    clear: both; 
+    padding: 20px; 
+    background-color: #efefef;
+    border-top: 1px solid #ddd;
+    display: block;
 }
+
+    footer p
+    {
+        font-family: Palatino, Georgia, Times, serif;
+        font-size: 14px; 
+        margin-left: 10px;
+        color: #666;
+        /*text-shadow: 1px 1px 0px #fff;*/
+    }
 
 #location-q
 {
-    width: 20em;
+    width: 24em;
 }
 
 #tract-map
@@ -177,5 +214,5 @@ sup
 
 .loading *
 {
-    display: none;
+    display: none !important;
 }

@@ -7,9 +7,34 @@
     width: 24%;
 }
 
-.gender.chart { height: 225px; }
-.race.chart { height: 375px; }
-.age.chart, .housing.chart, .income.chart, .education.chart { height: 325px; }
+.gender.chart { height: 250px; }
+.race.chart { height: 400px; }
+.age.chart, .housing.chart, .income.chart, .education.chart { height: 350px; }
+
+#county .chart, #state .chart, #country .chart { padding-top: 30px; }
+
+h3.wide-header
+{
+	display: block;
+	height: 30px;
+	margin: 0px;
+	padding: 0px;
+	line-height: 0;
+}
+
+h5
+{
+	display: block;
+	padding: 0px;
+	margin: 0 0 5px 10px;
+	font-size: 11px;
+	color: #888;
+	font-family: Palatino, Georgia, Times, serif;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+h4 { display: none; }
 
 .geographic-area>*
 {
@@ -39,6 +64,7 @@
     
     .labeled-pie-chart h4
     {
+        display: none; 
         margin: .5em 0 1em 0;
     }
     

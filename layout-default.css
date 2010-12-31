@@ -5,8 +5,25 @@
     margin-top: 1em;
 }
 
-.gender.chart { height: 150px; }
-.age.chart, .race.chart, .housing.chart, .income.chart, .education.chart { height: 200px; }
+.gender.chart { height: 200px; }
+.age.chart, .race.chart, .housing.chart, .income.chart, .education.chart { height: 250px; }
+
+dl { margin-bottom: 50px;  }
+
+.wide-header { display: none; }
+h5 { display: none; }
+
+dt
+{
+    font-size: 11px;
+    font-weight: bold;
+    color: #666;
+    font-family: Palatino, Georgia, Times, serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+}
+
 
 .labeled-pie-chart
 {
@@ -40,6 +57,7 @@
     
     .labeled-pie-chart ol li
     {
+        font-family: verdana, Helvetica, Arial, sans-serif;
         margin: 0;
         width: 290px;
         padding: 0 0 0 10px;
